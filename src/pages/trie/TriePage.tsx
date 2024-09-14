@@ -3,7 +3,7 @@ import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
 import { parseStateKey } from "@/components/trie/utils";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
 import { useState } from "react";
-import ReactJson from "react-json-view";
+// import ReactJson from "react-json-view";
 
 const vector = {
   "5dffe0e2c9f089d30e50b04ee562445cf2c0e7e7d677580ef0ccf2c6fa3522dd":
@@ -38,12 +38,12 @@ const getTrie = (data: { [key: string]: string }) => {
   return defaultTrie;
 };
 export const TriePage = () => {
-  const [trie, setTrie] = useState(getTrie(vector));
+  const [trie] = useState(getTrie(vector));
   return (
     <div className="p-6 flex flex-col h-full">
       <div>
         <h1>Trie Input</h1>
-        <ReactJson
+        {/* <ReactJson
           name="trie"
           src={vector}
           onEdit={(edit) => {
@@ -51,7 +51,7 @@ export const TriePage = () => {
               setTrie(getTrie(edit.updated_src as { [key: string]: string }));
             }
           }}
-        />
+        /> */}
       </div>
 
       <div className="flex flex-row h-full w-full">

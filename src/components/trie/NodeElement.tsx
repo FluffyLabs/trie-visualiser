@@ -1,4 +1,3 @@
-import React from "react";
 import { CustomNodeElementProps } from "react-d3-tree";
 
 const DEFAULT_NODE_CIRCLE_RADIUS = 15;
@@ -16,13 +15,13 @@ const textLayout = {
 
 export type NodeElementProps = CustomNodeElementProps;
 
-const NodeElement: React.FunctionComponent<NodeElementProps> = ({
+const NodeElement = ({
   nodeDatum,
   toggleNode,
   onNodeClick,
   onNodeMouseOver,
   onNodeMouseOut,
-}) => (
+}: NodeElementProps) => (
   <>
     <circle
       r={DEFAULT_NODE_CIRCLE_RADIUS}
