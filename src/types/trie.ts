@@ -18,18 +18,12 @@ type Bytes<T extends number> = {
   parseBytes<X extends number>(v: string, len: X): Bytes<X>;
 };
 
-type StringLiteral<Type> = Type extends string
-  ? string extends Type
-    ? never
-    : Type
-  : never;
+type StringLiteral<Type> = Type extends string ? (string extends Type ? never : Type) : never;
 declare const __OPAQUE_TYPE__: unique symbol;
 type WithOpaque<Token extends string> = {
   readonly [__OPAQUE_TYPE__]: Token;
 };
-type Opaque<Type, Token extends string> = Token extends StringLiteral<Token>
-  ? Type & WithOpaque<Token>
-  : never;
+type Opaque<Type, Token extends string> = Token extends StringLiteral<Token> ? Type & WithOpaque<Token> : never;
 type TruncatedStateKey = Opaque<Bytes<31>, "stateKey">;
 type Hash = Bytes<32>;
 type ValueHash = Opaque<Hash, "trieValue">;

@@ -15,13 +15,7 @@ const textLayout = {
 
 export type NodeElementProps = CustomNodeElementProps;
 
-const NodeElement = ({
-  nodeDatum,
-  toggleNode,
-  onNodeClick,
-  onNodeMouseOver,
-  onNodeMouseOut,
-}: NodeElementProps) => (
+const NodeElement = ({ nodeDatum, toggleNode, onNodeClick, onNodeMouseOver, onNodeMouseOut }: NodeElementProps) => (
   <>
     <circle
       r={DEFAULT_NODE_CIRCLE_RADIUS}
@@ -38,16 +32,11 @@ const NodeElement = ({
       </text>
       <text className="rd3t-label__attributes">
         {nodeDatum.attributes &&
-          Object.entries(nodeDatum.attributes).map(
-            ([labelKey, labelValue], i) => (
-              <tspan key={`${labelKey}-${i}`} {...textLayout.attribute}>
-                {labelKey}:{" "}
-                {typeof labelValue === "boolean"
-                  ? labelValue.toString()
-                  : labelValue}
-              </tspan>
-            )
-          )}
+          Object.entries(nodeDatum.attributes).map(([labelKey, labelValue], i) => (
+            <tspan key={`${labelKey}-${i}`} {...textLayout.attribute}>
+              {labelKey}: {typeof labelValue === "boolean" ? labelValue.toString() : labelValue}
+            </tspan>
+          ))}
       </text>
     </g>
   </>
