@@ -1,11 +1,6 @@
 import Logo from "@/assets/logo.png";
 import GithubLogo from "@/assets/github-mark-white.svg";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 
 export const Header = () => {
   return (
@@ -16,11 +11,7 @@ export const Header = () => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <a
-                target="_blank"
-                href="https://github.com/fluffylabs/typeberry-toolkit"
-                rel="noreferrer"
-              >
+              <a target="_blank" href="https://github.com/fluffylabs/typeberry-toolkit" rel="noreferrer">
                 <img src={GithubLogo} alt="GitHub logo" width={32} />
               </a>
             </TooltipTrigger>
