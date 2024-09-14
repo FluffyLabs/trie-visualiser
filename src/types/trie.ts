@@ -2,14 +2,6 @@ export type TrieHasher = {
   hashConcat(n: Uint8Array, r?: Uint8Array[]): TrieHash;
 };
 
-type WriteableNodesDb = {
-  hasher: TrieHasher;
-  insert: (node: TrieNodeType) => TrieHash;
-  remove: (hash: TrieHash) => void;
-  get: (hash: TrieHash) => TrieNodeType | null;
-  hashNode: (node: TrieNodeType) => TrieHash;
-};
-
 type BranchNodeType = {
   node: TrieNodeType;
   getLeft: () => TrieHash;
@@ -70,7 +62,7 @@ export type TrieHash = {
 
 export type InMemoryTrieType = {
   flat: Map<string, BytesBlob>;
-  nodes: WriteableNodesDb;
+  nodes: WriteableNodesDbType;
   root: TrieNodeType | null;
   set: (key: StateKey, value: BytesBlob, maybeValueHash?: TrieHash) => void;
   getRoot: () => TrieHash;
@@ -105,3 +97,8 @@ export type BytesBlobType = {
 };
 
 export type StateKey = Opaque<Bytes<32>, "stateKey">;
+
+export type WriteableNodesDbType = NodesDbType & {
+  remove(hash: TrieHash): void;
+  insert(node: TrieNodeType, hash?: TrieHash): TrieHash;
+};

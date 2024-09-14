@@ -1,15 +1,15 @@
 import {
   TrieNodeType,
   NodeType,
-  NodesDbType,
   StateKey,
+  WriteableNodesDbType,
 } from "../../types/trie";
 import { RawNodeDatum } from "react-d3-tree";
 import { Bytes } from "@typeberry/trie";
 
 export function trieToTreeUI(
   root: TrieNodeType | null,
-  nodes: NodesDbType
+  nodes: WriteableNodesDbType
 ): RawNodeDatum | RawNodeDatum[] | undefined {
   if (root === null) {
     return undefined;
