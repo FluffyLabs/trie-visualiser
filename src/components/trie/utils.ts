@@ -7,6 +7,9 @@ import {
 import { RawNodeDatum } from "react-d3-tree";
 import { Bytes } from "@typeberry/trie";
 
+const truncateHashString = (str: string) =>
+  str.substring(0, 4) + "..." + str.substring(str.length - 4);
+
 export function trieToTreeUI(
   root: TrieNodeType | null,
   nodes: WriteableNodesDbType
@@ -20,25 +23,28 @@ export function trieToTreeUI(
     const branch = root.asBranchNode();
     const leftHash = branch.getLeft();
     const rightHash = branch.getRight();
-    // const indent = (v: string) =>
-    //   v
-    //     .split("\n")
-    //     .map((v) => `\t\t${v}`)
-    //     .join("\n");
     const left = trieToTreeUI(nodes.get(leftHash), nodes);
     const right = trieToTreeUI(nodes.get(rightHash), nodes);
-    console.log(left, leftHash);
     return {
-      name: "Branch",
+      name: "Root",
       children: [
         {
-          name: leftHash.toString(),
-          children: Array.isArray(left) || left === undefined ? left : [left],
+          name: truncateHashString(leftHash.toString()),
+          children:
+            Array.isArray(left) || left === undefined
+              ? left
+              : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
+              ? left.children
+              : [left],
         },
         {
-          name: rightHash.toString(),
+          name: truncateHashString(rightHash.toString()),
           children:
-            Array.isArray(right) || right === undefined ? right : [right],
+            Array.isArray(right) || right === undefined
+              ? right
+              : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
+              ? right.children
+              : [right],
         },
       ],
     };
@@ -48,10 +54,15 @@ export function trieToTreeUI(
   const valueLength = leaf.getValueLength();
   const value =
     valueLength > 0
-      ? `'${leaf.getValue()}'(len:${valueLength})`
-      : `'<hash>${leaf.getValueHash()}'`;
+      ? `'${truncateHashString(
+          leaf.getValue().toString()
+        )}'(len:${valueLength})`
+      : `'<hash>${truncateHashString(leaf.getValueHash().toString())}'`;
 
-  return { name: `Leaf('${leaf.getKey().toString()}',${value})` };
+  // return { name: `Leaf('${leaf.getKey().toString()}',${value})` };
+  return {
+    name: `Leaf('${truncateHashString(leaf.getKey().toString())}',${value})`,
+  };
 }
 
 export const HASH_BYTES = 32;
