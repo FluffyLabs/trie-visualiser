@@ -1,10 +1,5 @@
 import { CustomNodeElementProps } from "react-d3-tree";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SyntheticEvent, useState } from "react";
 import "./NodeElement.css";
 import { truncateString } from "./utils";
@@ -45,13 +40,7 @@ const textLayout = {
 
 export type NodeElementProps = CustomNodeElementProps;
 
-const NodeElement = ({
-  nodeDatum,
-  toggleNode,
-  onNodeClick,
-  onNodeMouseOver,
-  onNodeMouseOut,
-}: NodeElementProps) => {
+const NodeElement = ({ nodeDatum, toggleNode, onNodeClick, onNodeMouseOver, onNodeMouseOut }: NodeElementProps) => {
   const [isVisibleNode, setIsVisibleNode] = useState(false);
   const onMouseOver = (ev: SyntheticEvent) => {
     setIsVisibleNode(true);
@@ -81,10 +70,7 @@ const NodeElement = ({
                 <rect {...textLayout.tooltipBox}></rect>
                 <text {...textLayout.tooltip}>Hash: {nodeDatum.name}</text>
                 <text {...textLayout.tooltipValue}>
-                  Value:{" "}
-                  {nodeDatum.attributes?.value ||
-                    nodeDatum.attributes?.valueHash ||
-                    "<Empty>"}
+                  Value: {nodeDatum.attributes?.value || nodeDatum.attributes?.valueHash || "<Empty>"}
                 </text>
               </g>
             )}

@@ -6,12 +6,5 @@ import nodeElementFunc from "./NodeElement";
 export const Trie = ({ trie }: { trie: InMemoryTrieType }) => {
   const data = trieToTreeUI(trie.root, trie.nodes);
 
-  return (
-    <Tree
-      data={data}
-      orientation="vertical"
-      zoom={0.2}
-      renderCustomNodeElement={nodeElementFunc}
-    />
-  );
+  return <Tree data={data} orientation="vertical" zoom={0.2} renderCustomNodeElement={nodeElementFunc} />;
 };
