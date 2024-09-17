@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "format-check": "prettier --check 'src/**/*.{ts,tsx}'",
+    "format": "prettier --write .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,8 +18,7 @@
     "blake2b": "^2.1.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "i": "^0.3.7",
-    "npm": "^10.8.3",
+    "prettier": "3.3.3",
     "react": "^18.3.1",
     "react-d3-tree": "^3.6.2",
     "react-dom": "^18.3.1",

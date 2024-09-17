@@ -1,9 +1,4 @@
-import {
-  TrieNodeType,
-  NodeType,
-  StateKey,
-  WriteableNodesDbType,
-} from "../../types/trie";
+import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType } from "../../types/trie";
 import { RawNodeDatum } from "react-d3-tree";
 import { Bytes } from "@typeberry/trie";
 
@@ -14,7 +9,7 @@ export const truncateString = (str: string, maxLength: number = 20) =>
 
 export function trieToTreeUI(
   root: TrieNodeType | null,
-  nodes: WriteableNodesDbType
+  nodes: WriteableNodesDbType,
 ): RawNodeDatum | RawNodeDatum[] | undefined {
   if (root === null) {
     return undefined;
@@ -36,8 +31,8 @@ export function trieToTreeUI(
             Array.isArray(left) || left === undefined
               ? left
               : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
-              ? left.children
-              : [left],
+                ? left.children
+                : [left],
         },
         {
           name: rightHash.toString(),
@@ -45,8 +40,8 @@ export function trieToTreeUI(
             Array.isArray(right) || right === undefined
               ? right
               : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
-              ? right.children
-              : [right],
+                ? right.children
+                : [right],
         },
       ],
     };
