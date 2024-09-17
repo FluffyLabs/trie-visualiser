@@ -55,58 +55,14 @@ export const TriePage = () => {
       </div>
 
       <div className="flex flex-row h-full w-full">
-        <div className="bg-slate-200 w-[400px] h-full">
+        {/* <div className="bg-slate-200 w-[400px] h-full">
           <p>
             0x867c48de923dee8828ae54ce7c26fbeea74eec9d698eb814af88afbc4acf3893
           </p>
           <ul className="mt-3">
-            <li>
-              Parent element:
-              0x867c48de923dee8828ae54ce7c26fbeea74eec9d698eb814af88afbc4acf3893
-            </li>
-            <li>
-              Bits:
-              {JSON.stringify(
-                {
-                  "0": 0,
-                  "1": 0,
-                  "2": 0,
-                  "3": 0,
-                  "4": 0,
-                  "5": 0,
-                  "6": 0,
-                  "7": 0,
-                  "8": 0,
-                  "9": 0,
-                  "10": 0,
-                  "11": 0,
-                  "12": 0,
-                  "13": 0,
-                  "14": 0,
-                  "15": 0,
-                  "16": 0,
-                  "17": 0,
-                  "18": 0,
-                  "19": 0,
-                  "20": 0,
-                  "21": 0,
-                  "22": 0,
-                  "23": 0,
-                  "24": 0,
-                  "25": 0,
-                  "26": 0,
-                  "27": 0,
-                  "28": 0,
-                  "29": 0,
-                  "30": 0,
-                  "31": 0,
-                },
-                null,
-                2
-              )}
-            </li>
+            <li>Details</li>
           </ul>
-        </div>
+        </div> */}
         <Trie trie={trie} />
       </div>
     </div>
