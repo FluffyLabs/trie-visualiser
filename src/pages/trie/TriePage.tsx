@@ -31,7 +31,6 @@ export const TriePage = () => {
 
     setError("");
     try {
-      setRowsData(rows);
       setTrie(getTrie(input));
     } catch (error: unknown) {
       setError(error?.message);
@@ -41,8 +40,15 @@ export const TriePage = () => {
   return (
     <div className="p-3 flex flex-row h-full">
       <div className="pr-3 border-r-2">
-        <h1 className="my-2 font-semibold">Trie Input</h1>
-        <ExampleModal onSelect={onChange} />
+        <h1 className="my-2 mr-5 font-semibold inline-block">Trie Input</h1>
+        <div className="inline-block">
+          <ExampleModal
+            onSelect={(rows) => {
+              setRowsData(rows);
+              onChange(rows);
+            }}
+          />
+        </div>
 
         {error && <div className="text-red-500">{error}</div>}
         <TrieInput initialRows={rowsData} onChange={onChange} />

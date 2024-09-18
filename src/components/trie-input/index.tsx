@@ -27,21 +27,19 @@ type TrieInputProps = {
 
 export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   // Initialize state with one empty row
-  const [rows, setRows] = useState<Row[]>(
-    initialRows && initialRows.length > 0
-      ? initialRows
-      : [{ id: "1", action: "", key: "", value: "", isSubmitted: false }],
-  );
+  const [rows, setRows] = useState<Row[]>([{ id: "1", action: "", key: "", value: "", isSubmitted: false }]);
 
   useEffect(() => {
-    if (initialRows) {
-      setRows(initialRows);
+    if (initialRows && initialRows.length > 0) {
+      setRows([
+        ...initialRows,
+        { id: (initialRows.length + 1).toString(), action: "", key: "", value: "", isSubmitted: false },
+      ]);
     }
   }, [initialRows]);
 
   const modifyRows = (newRows: Row[]) => {
     setRows(newRows);
-
     onChange(newRows.filter((row) => row.isSubmitted));
   };
 
