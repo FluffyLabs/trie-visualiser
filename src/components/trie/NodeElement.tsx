@@ -18,7 +18,7 @@ const textLayout = {
   tooltipBox: {
     y: -140,
     x: -100,
-    "stroke-width": "1",
+    strokeWidth: "1",
     stroke: "#000000",
     width: "680",
     height: "100",
@@ -28,13 +28,13 @@ const textLayout = {
     y: -140,
     x: -90,
     dy: "1.2em",
-    "stroke-width": "1",
+    strokeWidth: "1",
   },
   tooltipValue: {
     y: -100,
     x: -90,
     dy: "1.2em",
-    "stroke-width": "1",
+    strokeWidth: "1",
   },
 };
 
@@ -69,9 +69,12 @@ const NodeElement = ({ nodeDatum, toggleNode, onNodeClick, onNodeMouseOver, onNo
               <g className="rd3t-custom-tooltip">
                 <rect {...textLayout.tooltipBox}></rect>
                 <text {...textLayout.tooltip}>Hash: {nodeDatum.name}</text>
-                <text {...textLayout.tooltipValue}>
-                  Value: {nodeDatum.attributes?.value || nodeDatum.attributes?.valueHash || "<Empty>"}
-                </text>
+                {nodeDatum.attributes?.value && (
+                  <text {...textLayout.tooltipValue}>Value: {nodeDatum.attributes?.value || "<Empty>"}</text>
+                )}
+                {nodeDatum.attributes?.valueHash && (
+                  <text {...textLayout.tooltipValue}>Value hash: {nodeDatum.attributes?.valueHash || "<Empty>"}</text>
+                )}
               </g>
             )}
             <g className="rd3t-label">
