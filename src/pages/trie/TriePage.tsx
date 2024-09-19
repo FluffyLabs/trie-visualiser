@@ -7,24 +7,26 @@ import { InMemoryTrieType } from "@/types/trie";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
 import { useState } from "react";
 
-const getTrie = (data: { key: string; value: string }[]) => {
-  const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher);
-
-  for (const { key, value } of data) {
+const getTrie = (data: { key: string; value: string; action: "add" | "remove" | "" }[]) => {
+  const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher) as InMemoryTrieType;
+  const merged = data.filter(
+    ({ key }, index) => !data.slice(index, data.length).some((r) => r.key === key && r.action === "remove"),
+  );
+  for (const { key, value } of merged) {
     const stateKey = parseStateKey(key);
     const val = BytesBlob.parseBlobNoPrefix(value);
     defaultTrie.set(stateKey, val);
   }
   return defaultTrie;
 };
+
 export const TriePage = () => {
   const [rowsData, setRowsData] = useState<Row[]>([]);
   const [trie, setTrie] = useState<InMemoryTrieType>();
   const [error, setError] = useState<string>();
 
   const onChange = (rows: Row[]) => {
-    const input = rows.map(({ key, value }) => ({ key, value }));
-    console.log("input", input);
+    const input = rows.map(({ key, value, action }) => ({ key, value, action }));
     if (input.length === 0) {
       return;
     }

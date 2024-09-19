@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, MinusIcon, GripVerticalIcon } from "lucide-react";
+import { PlusIcon, MinusIcon, GripVerticalIcon, EyeIcon } from "lucide-react";
 
 // Import dnd-kit components
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
@@ -13,7 +13,7 @@ import { CSS } from "@dnd-kit/utilities";
 // Define the type for a row
 export interface Row {
   id: string;
-  action: string;
+  action: "add" | "remove" | "";
   key: string;
   value: string;
   isSubmitted: boolean;
@@ -28,6 +28,7 @@ type TrieInputProps = {
 export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   // Initialize state with one empty row
   const [rows, setRows] = useState<Row[]>([{ id: "1", action: "", key: "", value: "", isSubmitted: false }]);
+  const [eyeIconRowId, setEyeIconRowId] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialRows && initialRows.length > 0) {
@@ -46,7 +47,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   // Handle changes in the Select component
   const handleSelectChange = (index: number, value: string): void => {
     const newRows = [...rows];
-    newRows[index].action = value;
+    newRows[index].action = value as "add" | "remove" | "";
     modifyRows(newRows);
   };
 
@@ -83,6 +84,10 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
     const newRows = [...rows];
     newRows.splice(index, 1);
     modifyRows(newRows);
+    // If the removed row had the eye icon active, reset it
+    if (eyeIconRowId && newRows.findIndex((row) => row.id === eyeIconRowId) === -1) {
+      setEyeIconRowId(null);
+    }
   };
 
   // Handle drag end
@@ -98,6 +103,24 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
       // Merge back with the unsubmitted row(s)
       const unsubmittedRows = rows.filter((row) => !row.isSubmitted);
       modifyRows([...newSubmittedRows, ...unsubmittedRows]);
+    }
+  };
+
+  // Handle eye icon click
+  const handleEyeIconClick = (rowId: string): void => {
+    if (eyeIconRowId === rowId) {
+      // Uncheck the eye icon
+      setEyeIconRowId(null);
+      onChange(rows.filter((row) => row.isSubmitted));
+    } else {
+      // Set the eye icon to this row
+      setEyeIconRowId(rowId);
+      const index = rows.findIndex((row) => row.id === rowId);
+      if (index !== -1) {
+        const emittedRows = rows.slice(0, index + 1);
+        console.log("emittedRows", emittedRows);
+        onChange(emittedRows.filter((row) => row.isSubmitted));
+      }
     }
   };
 
@@ -123,6 +146,8 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
                 handleValueChange={handleValueChange}
                 handleAddRow={handleAddRow}
                 handleRemoveRow={handleRemoveRow}
+                handleEyeIconClick={handleEyeIconClick}
+                eyeIconRowId={eyeIconRowId}
               />
             );
           })}
@@ -157,10 +182,14 @@ interface SortableItemProps {
   handleValueChange: (index: number, value: string) => void;
   handleAddRow: (index: number) => void;
   handleRemoveRow: (index: number) => void;
+  handleEyeIconClick: (rowId: string) => void;
+
+  eyeIconRowId: string | null;
 }
 
 function SortableItem(props: SortableItemProps): JSX.Element {
   const { id, index, row, handleSelectChange, handleKeyChange, handleValueChange, handleRemoveRow } = props;
+  const isEyeActive = props.eyeIconRowId === id;
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
@@ -184,6 +213,10 @@ function SortableItem(props: SortableItemProps): JSX.Element {
       </div>
       <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
       <Input placeholder="Value" value={row.value} onChange={(e) => handleValueChange(index, e.target.value)} />
+      {/* Eye Icon */}
+      <Button variant="ghost" onClick={() => props.handleEyeIconClick(id)}>
+        <EyeIcon className={`w-4 h-4 ${isEyeActive ? "text-blue-500" : ""}`} />
+      </Button>
       {/* Drag Handle */}
       <Button variant="ghost" {...attributes} {...listeners}>
         <GripVerticalIcon className="w-4 h-4 cursor-move" />
