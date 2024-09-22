@@ -35,7 +35,9 @@ export const TriePage = () => {
     try {
       setTrie(getTrie(input));
     } catch (error: unknown) {
-      setError(error?.message);
+      if (error instanceof Error) {
+        setError(error.message);
+      }
     }
   };
 
