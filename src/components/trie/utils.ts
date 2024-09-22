@@ -2,7 +2,8 @@ import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType } from "../../ty
 import { RawNodeDatum } from "react-d3-tree";
 import { Bytes } from "@typeberry/trie";
 
-const truncateHashString = (str: string) => str.substring(0, 4) + "..." + str.substring(str.length - 4);
+export const truncateString = (str: string, maxLength: number = 20) =>
+  str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
 
 export function trieToTreeUI(
   root: TrieNodeType | null,
@@ -23,7 +24,7 @@ export function trieToTreeUI(
       name: "Root",
       children: [
         {
-          name: truncateHashString(leftHash.toString()),
+          name: leftHash.toString(),
           children:
             Array.isArray(left) || left === undefined
               ? left
@@ -32,7 +33,7 @@ export function trieToTreeUI(
                 : [left],
         },
         {
-          name: truncateHashString(rightHash.toString()),
+          name: rightHash.toString(),
           children:
             Array.isArray(right) || right === undefined
               ? right
@@ -46,14 +47,15 @@ export function trieToTreeUI(
 
   const leaf = root.asLeafNode();
   const valueLength = leaf.getValueLength();
-  const value =
-    valueLength > 0
-      ? `'${truncateHashString(leaf.getValue().toString())}'(len:${valueLength})`
-      : `'<hash>${truncateHashString(leaf.getValueHash().toString())}'`;
 
   // return { name: `Leaf('${leaf.getKey().toString()}',${value})` };
   return {
-    name: `Leaf('${truncateHashString(leaf.getKey().toString())}',${value})`,
+    name: leaf.getKey().toString(),
+    attributes: {
+      ...(valueLength > 0
+        ? { value: `${leaf.getValue()}; length: ${valueLength}` }
+        : { valueHash: `${leaf.getValueHash()}` }),
+    },
   };
 }
 
