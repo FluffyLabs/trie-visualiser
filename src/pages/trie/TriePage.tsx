@@ -1,4 +1,3 @@
-import { Trie } from "@/components/trie";
 import { Row, TrieInput } from "@/components/trie-input";
 import ExampleModal from "@/components/trie-input/example-modal";
 import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
@@ -27,7 +26,7 @@ const Test = ({ trie }: { trie?: InMemoryTrieType }) => {
   }
 
   const data = trieToTreeUI(trie.root, trie.nodes);
-
+  console.log("data", data);
   return <GraphComponent treeData={data as TreeNode} />;
 };
 

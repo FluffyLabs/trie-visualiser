@@ -20,28 +20,33 @@ export function trieToTreeUI(
     const rightHash = branch.getRight();
     const left = trieToTreeUI(nodes.get(leftHash), nodes);
     const right = trieToTreeUI(nodes.get(rightHash), nodes);
+    const children = [];
+
+    if (left !== undefined) {
+      children.push({
+        name: leftHash.toString(),
+        children:
+          Array.isArray(left) || left === undefined
+            ? left
+            : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
+              ? left.children
+              : [left],
+      });
+    }
+    if (right !== undefined) {
+      children.push({
+        name: rightHash.toString(),
+        children:
+          Array.isArray(right) || right === undefined
+            ? right
+            : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
+              ? right.children
+              : [right],
+      });
+    }
     return {
       name: "Root",
-      children: [
-        {
-          name: leftHash.toString(),
-          children:
-            Array.isArray(left) || left === undefined
-              ? left
-              : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
-                ? left.children
-                : [left],
-        },
-        {
-          name: rightHash.toString(),
-          children:
-            Array.isArray(right) || right === undefined
-              ? right
-              : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
-                ? right.children
-                : [right],
-        },
-      ],
+      children,
     };
   }
 

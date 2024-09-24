@@ -1,10 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
-import { ReactFlow, Background, Controls, MiniMap, Node, Edge } from "@xyflow/react";
-import dagre from "dagre";
-import { useSpring, animated } from "@react-spring/web";
-import "@xyflow/react/dist/style.css";
+import React, { useEffect, useState } from "react";
+import CytoscapeComponent from "react-cytoscapejs";
+import cytoscape from "cytoscape";
 
-interface TreeNode {
+export interface TreeNode {
   name: string;
   children?: TreeNode[];
   attributes?: { [key: string]: string };
@@ -17,178 +15,103 @@ interface GraphComponentProps {
 const nodeWidth = 200;
 const nodeHeight = 50;
 
-const getLayoutedElements = (nodes: Node[], layoutedEdges: Edge[]) => {
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: "TB" }); // top to bottom layout
-
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-  });
-
-  layoutedEdges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(dagreGraph);
-
-  const layoutedNodes = nodes.map((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    return {
-      ...node,
-      position: { x: nodeWithPosition.x, y: nodeWithPosition.y },
-      style: { width: nodeWidth, height: nodeHeight },
-    };
-  });
-
-  return { layoutedNodes, layoutedEdges };
-};
-
-const buildGraphData = (node: TreeNode, parentId: string | null = null, nodes: Node[] = [], edges: Edge[] = []) => {
+// Build Cytoscape graph data from treeData, ensuring each node is only connected to its own children
+const buildCytoscapeGraphData = (
+  node: TreeNode,
+  parentId: string | null = null,
+  elements: cytoscape.ElementDefinition[] = [],
+) => {
   const id = node.name;
-  nodes.push({
-    id,
+
+  // Add the node to elements
+  elements.push({
     data: {
-      label: `${node.name}${
-        node.attributes
-          ? `\n${Object.entries(node.attributes)
-              .map(([key, val]) => `${key}: ${val}`)
-              .join(", ")}`
-          : ""
-      }`,
+      id,
+      label: node.attributes
+        ? `${node.name}\n${Object.entries(node.attributes)
+            .map(([key, val]) => `${key}: ${val}`)
+            .join(", ")}`
+        : node.name,
     },
-    position: { x: 0, y: 0 }, // Placeholder, layout handled by dagre
   });
 
+  // Connect the node to its parent if applicable
   if (parentId) {
-    edges.push({ id: `${parentId}-${id}`, source: parentId, target: id });
+    elements.push({
+      data: { id: `${parentId}-${id}`, source: parentId, target: id },
+    });
   }
 
-  if (node.children) {
-    node.children.forEach((child) => buildGraphData(child, id, nodes, edges));
+  // Ensure each node only connects to its direct children and no other unrelated nodes
+  if (node.children && node.children.length > 0) {
+    const limitedChildren = node.children.slice(0, 2); // Limit to two child nodes
+    limitedChildren.forEach((child) => {
+      buildCytoscapeGraphData(child, id, elements); // Pass the current node's ID as the parentId
+    });
   }
 
-  return { nodes, edges };
-};
-
-// Animated Node component
-const AnimatedNode = ({
-  node,
-  isNew,
-  isRemoved,
-  onRemove,
-}: {
-  node: Node;
-  isNew: boolean;
-  isRemoved?: boolean;
-  onRemove?: () => void;
-}) => {
-  const springs = useSpring({
-    from: isNew ? { opacity: 0, transform: "scale(0.5)" } : { opacity: 1, transform: "scale(1)" },
-    to: isRemoved ? { opacity: 0, transform: "scale(0.5)" } : { opacity: 1, transform: "scale(1)" },
-    config: { tension: 200, friction: 15 },
-    onRest: () => {
-      if (isRemoved && onRemove) {
-        onRemove(); // Handle animation end for removal
-      }
-    },
-  });
-
-  return (
-    <animated.div style={{ ...springs, width: nodeWidth, height: nodeHeight, ...node.style }}>
-      {node.data.label}
-    </animated.div>
-  );
+  return elements;
 };
 
 const GraphComponent: React.FC<GraphComponentProps> = ({ treeData }) => {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [removedNodes, setRemovedNodes] = useState<Node[]>([]);
-  const prevTreeData = useRef<TreeNode | null>(null);
-
-  // Compare previous and current treeData to detect added and removed nodes
-  const detectChanges = (prev: TreeNode | null, current: TreeNode) => {
-    const prevNodeIds = new Set<string>();
-    const currentNodeIds = new Set<string>();
-
-    // Helper to recursively collect node ids
-    const collectNodeIds = (node: TreeNode, nodeIds: Set<string>) => {
-      nodeIds.add(node.name);
-      if (node.children) {
-        node.children.forEach((child) => collectNodeIds(child, nodeIds));
-      }
-    };
-
-    if (prev) collectNodeIds(prev, prevNodeIds);
-    collectNodeIds(current, currentNodeIds);
-
-    const added = Array.from(currentNodeIds).filter((id) => !prevNodeIds.has(id));
-    const removed = Array.from(prevNodeIds).filter((id) => !currentNodeIds.has(id));
-
-    return { added, removed };
-  };
+  const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
+  const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
 
   useEffect(() => {
-    const { nodes: newGraphNodes, edges: newGraphEdges } = buildGraphData(treeData);
-    const { layoutedNodes, layoutedEdges } = getLayoutedElements(newGraphNodes, newGraphEdges);
-
-    // Detect changes
-    const changes = detectChanges(prevTreeData.current, treeData);
-
-    // Filter out removed nodes and start their animation
-    const remainingNodes = layoutedNodes.filter((node) => !changes.removed.includes(node.id));
-
-    // Set nodes with new ones being animated
-    setNodes((prevNodes) => [
-      ...remainingNodes,
-      ...(changes.added
-        .map((addedNodeId) => {
-          const newNode = layoutedNodes.find((node) => node.id === addedNodeId);
-          return newNode ? { ...newNode, data: { label: <AnimatedNode node={newNode} isNew={true} /> } } : null;
-        })
-        .filter(Boolean) as Node[]),
-    ]);
-
-    // Store removed nodes for animating out
-    const removedNodesData = nodes.filter((node) => changes.removed.includes(node.id));
-    setRemovedNodes(removedNodesData);
-
-    setEdges(layoutedEdges);
-
-    prevTreeData.current = treeData;
+    const graphElements = buildCytoscapeGraphData(treeData);
+    setElements(graphElements);
   }, [treeData]);
 
-  // Handle node removal after animation
-  const handleRemoveNode = (id: string) => {
-    setRemovedNodes((prev) => prev.filter((node) => node.id !== id));
-  };
+  // Update the layout when elements change
+  useEffect(() => {
+    if (cyInstance) {
+      const layout = cyInstance.layout({
+        name: "breadthfirst", // Hierarchical layout
+        directed: true, // Ensures child nodes are below parent nodes
+        padding: 10, // Padding around the layout
+        spacingFactor: 1.5, // Increase spacing between nodes
+        avoidOverlap: true, // Prevent nodes from overlapping
+        animate: true, // Animate the layout changes
+      });
+      layout.run();
+    }
+  }, [elements, cyInstance]);
 
   return (
     <div style={{ height: "100vh", width: "100%" }}>
-      <ReactFlow
-        nodes={[
-          ...nodes.map((node) => ({
-            ...node,
-            data: { label: <AnimatedNode node={node} isNew={false} /> },
-          })),
-          ...removedNodes.map((node) => ({
-            ...node,
-            data: {
-              label: (
-                <AnimatedNode node={node} isNew={false} isRemoved={true} onRemove={() => handleRemoveNode(node.id)} />
-              ),
+      <CytoscapeComponent
+        elements={elements}
+        style={{ width: "100%", height: "100%" }}
+        cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
+        layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
+        stylesheet={[
+          {
+            selector: "node",
+            style: {
+              width: nodeWidth,
+              height: nodeHeight,
+              label: "data(label)",
+              "text-valign": "center",
+              "text-halign": "center",
+              "background-color": "#0074D9",
+              color: "#fff",
+              "font-size": "12px",
+              "border-width": 2,
+              "border-color": "#333",
+              shape: "roundrectangle",
             },
-          })),
+          },
+          {
+            selector: "edge",
+            style: {
+              width: 2,
+              "line-color": "#ccc",
+              "target-arrow-color": "#ccc",
+              "target-arrow-shape": "triangle",
+            },
+          },
         ]}
-        edges={edges}
-        fitView
-        style={{ backgroundColor: "#fafafa" }}
-      >
-        <MiniMap />
-        <Controls />
-        <Background />
-      </ReactFlow>
+      />
     </div>
   );
 };
