@@ -13,7 +13,6 @@ export const Trie = ({ trie }: { trie?: InMemoryTrieType }) => {
   const data = trieToTreeUI(trie.root, trie.nodes);
   const bounding = treeContainer.current?.getBoundingClientRect();
 
-  console.log(data);
   return (
     <div ref={treeContainer} className="w-full h-full">
       <Tree

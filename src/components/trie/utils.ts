@@ -46,7 +46,26 @@ export function trieToTreeUI(
     }
     return {
       name: "Root",
-      children,
+      children: [
+        {
+          name: leftHash.toString(),
+          children:
+            Array.isArray(left) || left === undefined
+              ? left
+              : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
+                ? left.children
+                : [left],
+        },
+        {
+          name: rightHash.toString(),
+          children:
+            Array.isArray(right) || right === undefined
+              ? right
+              : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
+                ? right.children
+                : [right],
+        },
+      ],
     };
   }
 
