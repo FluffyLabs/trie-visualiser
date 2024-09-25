@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
-import cytoscape from "cytoscape";
+import cytoscape, { BaseLayoutOptions } from "cytoscape";
 import dagre from "cytoscape-dagre";
 import elk from "cytoscape-elk";
 import { truncateString } from "./utils";
 import cytoscapePopper from "cytoscape-popper";
-import tippy from "tippy.js";
+import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
 
-function tippyFactory(ref, content) {
+function tippyFactory(ref: { getBoundingClientRect: GetReferenceClientRect }, content: HTMLElement) {
   // Since tippy constructor requires DOM element/elements, create a placeholder
   const dummyDomEle = document.createElement("div");
 
@@ -116,7 +116,7 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ treeData }) => {
           //   "elk.spacing.nodeNode": 10,
           //   "elk.padding": new ElkPadding(),
         },
-      });
+      } as BaseLayoutOptions);
 
       cyInstance.nodes().forEach((node) => {
         const tip = node.popper({
@@ -131,11 +131,15 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ treeData }) => {
 
         // Show/hide tooltips on hover
         node.on("mouseover", () => {
-          tip.show();
+          if ("show" in tip && typeof tip.show === "function") {
+            tip.show();
+          }
         });
 
         node.on("mouseout", () => {
-          tip.hide();
+          if ("hide" in tip && typeof tip.hide === "function") {
+            tip.hide();
+          }
         });
       });
       layout.run();
@@ -155,7 +159,7 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ treeData }) => {
             style: {
               width: nodeWidth,
               height: nodeHeight,
-              label: function (element) {
+              label: function (element: { data: (arg0: string) => string }) {
                 return truncateString(element.data("label"), 20);
               },
               "text-valign": "center",
