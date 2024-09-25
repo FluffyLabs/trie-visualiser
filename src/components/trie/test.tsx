@@ -1,7 +1,41 @@
 import React, { useEffect, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
+import dagre from "cytoscape-dagre";
+import elk from "cytoscape-elk";
+import { truncateString } from "./utils";
+import cytoscapePopper from "cytoscape-popper";
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css"; // For styling
 
+cytoscape.use(dagre);
+cytoscape.use(elk);
+
+function tippyFactory(ref, content) {
+  // Since tippy constructor requires DOM element/elements, create a placeholder
+  const dummyDomEle = document.createElement("div");
+
+  const tip = tippy(dummyDomEle, {
+    getReferenceClientRect: ref.getBoundingClientRect,
+    trigger: "manual", // mandatory
+    // dom element inside the tippy:
+    content: content,
+    maxWidth: "none",
+    // your own preferences:
+    arrow: true,
+    placement: "top",
+    hideOnClick: false,
+    sticky: "reference",
+
+    // if interactive:
+    interactive: true,
+    appendTo: document.body, // or append dummyDomEle to document.body
+  });
+
+  return tip;
+}
+
+cytoscape.use(cytoscapePopper(tippyFactory));
 export interface TreeNode {
   name: string;
   children?: TreeNode[];
@@ -66,12 +100,43 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ treeData }) => {
   useEffect(() => {
     if (cyInstance) {
       const layout = cyInstance.layout({
-        name: "breadthfirst", // Hierarchical layout
-        directed: true, // Ensures child nodes are below parent nodes
-        padding: 10, // Padding around the layout
-        spacingFactor: 1.5, // Increase spacing between nodes
-        avoidOverlap: true, // Prevent nodes from overlapping
-        animate: true, // Animate the layout changes
+        // name: "breadthfirst", // Hierarchical layout
+        // directed: true, // Ensures child nodes are below parent nodes
+        // padding: 1, // Padding around the layout
+        // spacingFactor: 1.5, // Increase spacing between nodes
+        // avoidOverlap: true, // Prevent nodes from overlapping
+        // animate: true, // Animate the layout changes
+        // grid: true,
+        // name: "dagre",
+        animate: true,
+        animationDuration: 1000,
+        name: "elk",
+        elk: {
+          algorithm: "mrtree",
+          //   "elk.spacing.nodeNode": 10,
+          //   "elk.padding": new ElkPadding(),
+        },
+      });
+
+      cyInstance.nodes().forEach((node) => {
+        const tip = node.popper({
+          content: () => {
+            const content = document.createElement("div");
+
+            content.innerHTML = `Hash: ${node.data("label").split("value").join("<br> Value").split("valueHash").join("<br> ValueHash")}`;
+
+            return content;
+          },
+        });
+
+        // Show/hide tooltips on hover
+        node.on("mouseover", () => {
+          tip.show();
+        });
+
+        node.on("mouseout", () => {
+          tip.hide();
+        });
       });
       layout.run();
     }
@@ -90,7 +155,9 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ treeData }) => {
             style: {
               width: nodeWidth,
               height: nodeHeight,
-              label: "data(label)",
+              label: function (element) {
+                return truncateString(element.data("label"), 20);
+              },
               "text-valign": "center",
               "text-halign": "center",
               "background-color": "#0074D9",
