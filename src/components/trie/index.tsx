@@ -129,6 +129,9 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         },
       } as BaseLayoutOptions);
 
+      // Keep track of created tippy instances
+      const tippyInstances: cytoscapePopper.PopperInstance[] = [];
+
       cyInstance.nodes().forEach((node) => {
         const tip = node.popper({
           content: () => {
@@ -138,6 +141,9 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
             return content;
           },
         });
+
+        // Store the tippy instance for cleanup later
+        tippyInstances.push(tip);
 
         // Show/hide tooltips on hover
         node.on("mouseover", () => {
@@ -153,6 +159,14 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         });
       });
       layout.run();
+      // Cleanup tooltips and listeners on component unmount or element change
+      return () => {
+        tippyInstances.forEach((tip) => {
+          if ("destroy" in tip && typeof tip.destroy === "function") {
+            tip.destroy();
+          }
+        });
+      };
     }
   }, [elements, cyInstance]);
 
