@@ -7,6 +7,8 @@ import { truncateString } from "./utils";
 import cytoscapePopper from "cytoscape-popper";
 import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
+import "tippy.js/themes/light-border.css";
+import "tippy.js/animations/scale.css";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
@@ -16,6 +18,8 @@ function tippyFactory(ref: { getBoundingClientRect: GetReferenceClientRect }, co
   const dummyDomEle = document.createElement("div");
 
   const tip = tippy(dummyDomEle, {
+    theme: "light-border",
+    animation: "scale",
     getReferenceClientRect: ref.getBoundingClientRect,
     trigger: "manual", // mandatory
     // dom element inside the tippy:
@@ -129,7 +133,6 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         const tip = node.popper({
           content: () => {
             const content = document.createElement("div");
-
             content.innerHTML = `Hash: ${node.data("label").split("value").join("<br> Value").split("valueHash").join("<br> ValueHash")}`;
 
             return content;
@@ -171,7 +174,17 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
               },
               "text-valign": "center",
               "text-halign": "center",
-              "background-color": "#0074D9",
+              "background-color": (element: { data: (arg0: string) => string }) => {
+                if (element.data("label") === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                  return "#c9c9c9";
+                }
+
+                if (element.data("label").includes("value")) {
+                  return "#00bcd4";
+                }
+
+                return "#55b3f3";
+              },
               color: "#fff",
               "font-size": "12px",
               "border-width": 2,
