@@ -1,7 +1,7 @@
 import { Row, TrieInput } from "@/components/trie-input";
 import ExampleModal from "@/components/trie-input/example-modal";
 import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
-import GraphComponent, { TreeNode } from "@/components/trie/test";
+import Trie from "@/components/trie";
 import { parseStateKey, trieToTreeUI } from "@/components/trie/utils";
 import { InMemoryTrieType } from "@/types/trie";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
@@ -20,21 +20,12 @@ const getTrie = (data: { key: string; value: string; action: "add" | "remove" | 
   return defaultTrie;
 };
 
-const Test = ({ trie }: { trie?: InMemoryTrieType }) => {
-  if (!trie) {
-    return;
-  }
-
-  const data = trieToTreeUI(trie.root, trie.nodes);
-  console.log("data", data);
-  return <GraphComponent treeData={data as TreeNode} />;
-};
-
 export const TriePage = () => {
   const [rowsData, setRowsData] = useState<Row[]>([]);
   const [trie, setTrie] = useState<InMemoryTrieType>();
   const [error, setError] = useState<string>();
-
+  const data = trie && trieToTreeUI(trie.root, trie.nodes);
+  console.log(data);
   const onChange = (rows: Row[]) => {
     const input = rows.map(({ key, value, action }) => ({ key, value, action }));
     if (input.length === 0) {
@@ -68,9 +59,7 @@ export const TriePage = () => {
         <TrieInput initialRows={rowsData} onChange={onChange} />
       </div>
 
-      <div className="flex flex-row h-full w-full">
-        <Test trie={trie} />
-      </div>
+      <div className="flex flex-row h-full w-full">{data && <Trie treeData={data} />}</div>
     </div>
   );
 };

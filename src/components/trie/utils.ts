@@ -1,14 +1,11 @@
+import { TreeNode } from ".";
 import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType } from "../../types/trie";
-import { RawNodeDatum } from "react-d3-tree";
 import { Bytes } from "@typeberry/trie";
 
 export const truncateString = (str: string, maxLength: number = 20) =>
   str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
 
-export function trieToTreeUI(
-  root: TrieNodeType | null,
-  nodes: WriteableNodesDbType,
-): RawNodeDatum | RawNodeDatum[] | undefined {
+export function trieToTreeUI(root: TrieNodeType | null, nodes: WriteableNodesDbType): TreeNode | undefined {
   if (root === null) {
     return undefined;
   }
