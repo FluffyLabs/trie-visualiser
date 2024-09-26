@@ -162,6 +162,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
       style={{ width: "100%", height: "100%" }}
       cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
       layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
+      autoungrabify={true}
       stylesheet={[
         {
           selector: "node",
