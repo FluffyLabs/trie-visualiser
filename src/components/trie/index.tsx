@@ -157,53 +157,51 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
   }, [elements, cyInstance]);
 
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      <CytoscapeComponent
-        elements={elements}
-        style={{ width: "100%", height: "100%" }}
-        cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
-        layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
-        stylesheet={[
-          {
-            selector: "node",
-            style: {
-              width: nodeWidth,
-              height: nodeHeight,
-              label: function (element: { data: (arg0: string) => string }) {
-                return truncateString(element.data("label"), 20);
-              },
-              "text-valign": "center",
-              "text-halign": "center",
-              "background-color": (element: { data: (arg0: string) => string }) => {
-                if (element.data("label") === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-                  return "#c9c9c9";
-                }
-
-                if (element.data("label").includes("value")) {
-                  return "#00bcd4";
-                }
-
-                return "#55b3f3";
-              },
-              color: "#fff",
-              "font-size": "12px",
-              "border-width": 2,
-              "border-color": "#333",
-              shape: "roundrectangle",
+    <CytoscapeComponent
+      elements={elements}
+      style={{ width: "100%", height: "100%" }}
+      cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
+      layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
+      stylesheet={[
+        {
+          selector: "node",
+          style: {
+            width: nodeWidth,
+            height: nodeHeight,
+            label: function (element: { data: (arg0: string) => string }) {
+              return truncateString(element.data("label"), 20);
             },
-          },
-          {
-            selector: "edge",
-            style: {
-              width: 2,
-              "line-color": "#ccc",
-              "target-arrow-color": "#ccc",
-              "target-arrow-shape": "triangle",
+            "text-valign": "center",
+            "text-halign": "center",
+            "background-color": (element: { data: (arg0: string) => string }) => {
+              if (element.data("label") === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                return "#c9c9c9";
+              }
+
+              if (element.data("label").includes("value")) {
+                return "#00bcd4";
+              }
+
+              return "#55b3f3";
             },
+            color: "#fff",
+            "font-size": "12px",
+            "border-width": 2,
+            "border-color": "#333",
+            shape: "roundrectangle",
           },
-        ]}
-      />
-    </div>
+        },
+        {
+          selector: "edge",
+          style: {
+            width: 2,
+            "line-color": "#ccc",
+            "target-arrow-color": "#ccc",
+            "target-arrow-shape": "triangle",
+          },
+        },
+      ]}
+    />
   );
 };
 
