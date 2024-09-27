@@ -93,13 +93,6 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
         },
       ],
     },
-    // {
-    //   name: "Example 2",
-    //   rows: [
-    //     { id: "1", action: "add", key: "keyA", value: "valueA", isSubmitted: true },
-    //     { id: "2", action: "add", key: "keyB", value: "valueB", isSubmitted: true },
-    //   ],
-    // },
     // Add more examples as needed
   ];
 

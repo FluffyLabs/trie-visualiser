@@ -7,6 +7,24 @@ import { InMemoryTrieType } from "@/types/trie";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
 import { useState } from "react";
 
+const DEFAULT_ROWS_DATA: Row[] = [
+  {
+    id: "1",
+    action: "add",
+    key: "5dffe0e2c9f089d30e50b04ee562445cf2c0e7e7d677580ef0ccf2c6fa3522dd",
+    value:
+      "bb11c256876fe10442213dd78714793394d2016134c28a64eb27376ddc147fc6044df72bdea44d9ec66a3ea1e6d523f7de71db1d05a980e001e9fa",
+    isSubmitted: true,
+  },
+  {
+    id: "2",
+    action: "add",
+    key: "df08871e8a54fde4834d83851469e635713615ab1037128df138a6cd223f1242",
+    value: "b8bded4e1c",
+    isSubmitted: true,
+  },
+];
+
 const getTrie = (data: { key: string; value: string; action: "add" | "remove" | "" }[]) => {
   const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher) as InMemoryTrieType;
   const merged = data.filter(
@@ -21,8 +39,8 @@ const getTrie = (data: { key: string; value: string; action: "add" | "remove" | 
 };
 
 export const TriePage = () => {
-  const [rowsData, setRowsData] = useState<Row[]>([]);
-  const [trie, setTrie] = useState<InMemoryTrieType>();
+  const [rowsData, setRowsData] = useState<Row[]>(DEFAULT_ROWS_DATA);
+  const [trie, setTrie] = useState<InMemoryTrieType>(getTrie(DEFAULT_ROWS_DATA));
   const [error, setError] = useState<string>();
   const data = trie && trieToTreeUI(trie.root, trie.nodes);
   console.log(data);
