@@ -212,7 +212,12 @@ function SortableItem(props: SortableItemProps): JSX.Element {
         </Select>
       </div>
       <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
-      <Input placeholder="Value" value={row.value} onChange={(e) => handleValueChange(index, e.target.value)} />
+      <Input
+        placeholder="Value"
+        disabled={row.action === "remove"}
+        value={row.value}
+        onChange={(e) => handleValueChange(index, e.target.value)}
+      />
       {/* Eye Icon */}
       <Button variant="ghost" onClick={() => props.handleEyeIconClick(id)}>
         <EyeIcon className={`w-4 h-4 ${isEyeActive ? "text-blue-500" : ""}`} />
