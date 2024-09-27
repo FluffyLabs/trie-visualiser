@@ -68,7 +68,7 @@ const buildCytoscapeGraphData = (
 ) => {
   const uniqueId = generateNodeId(node, parentId, index);
 
-  // Add the node to elements
+  // Insert the node to elements
   elements.push({
     data: {
       id: uniqueId, // Unique ID for Cytoscape

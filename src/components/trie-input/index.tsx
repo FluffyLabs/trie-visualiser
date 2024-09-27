@@ -13,7 +13,7 @@ import { CSS } from "@dnd-kit/utilities";
 // Define the type for a row
 export interface Row {
   id: string;
-  action: "add" | "remove" | "";
+  action: "insert" | "remove" | "";
   key: string;
   value: string;
   isSubmitted: boolean;
@@ -47,7 +47,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   // Handle changes in the Select component
   const handleSelectChange = (index: number, value: string): void => {
     const newRows = [...rows];
-    newRows[index].action = value as "add" | "remove" | "";
+    newRows[index].action = value as "insert" | "remove" | "";
     modifyRows(newRows);
   };
 
@@ -66,7 +66,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   };
 
   // Handle adding a new row
-  const handleAddRow = (index: number): void => {
+  const handleInsertRow = (index: number): void => {
     const newRows = [...rows];
     newRows[index].isSubmitted = true;
     newRows.push({
@@ -144,7 +144,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
                 handleSelectChange={handleSelectChange}
                 handleKeyChange={handleKeyChange}
                 handleValueChange={handleValueChange}
-                handleAddRow={handleAddRow}
+                handleInsertRow={handleInsertRow}
                 handleRemoveRow={handleRemoveRow}
                 handleEyeIconClick={handleEyeIconClick}
                 eyeIconRowId={eyeIconRowId}
@@ -164,7 +164,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
               handleSelectChange={handleSelectChange}
               handleKeyChange={handleKeyChange}
               handleValueChange={handleValueChange}
-              handleAddRow={handleAddRow}
+              handleInsertRow={handleInsertRow}
             />
           );
         })}
@@ -180,7 +180,7 @@ interface SortableItemProps {
   handleSelectChange: (index: number, value: string) => void;
   handleKeyChange: (index: number, value: string) => void;
   handleValueChange: (index: number, value: string) => void;
-  handleAddRow: (index: number) => void;
+  handleInsertRow: (index: number) => void;
   handleRemoveRow: (index: number) => void;
   handleEyeIconClick: (rowId: string) => void;
 
@@ -206,7 +206,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
             <SelectValue placeholder="Action" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="add">Add</SelectItem>
+            <SelectItem value="insert">Insert</SelectItem>
             <SelectItem value="remove">Remove</SelectItem>
           </SelectContent>
         </Select>
@@ -235,11 +235,11 @@ interface InputRowProps {
   handleSelectChange: (index: number, value: string) => void;
   handleKeyChange: (index: number, value: string) => void;
   handleValueChange: (index: number, value: string) => void;
-  handleAddRow: (index: number) => void;
+  handleInsertRow: (index: number) => void;
 }
 
 const InputRow = (props: InputRowProps) => {
-  const { index, row, handleSelectChange, handleKeyChange, handleValueChange, handleAddRow } = props;
+  const { index, row, handleSelectChange, handleKeyChange, handleValueChange, handleInsertRow } = props;
 
   return (
     <div className="flex space-x-2 items-center my-2">
@@ -249,7 +249,7 @@ const InputRow = (props: InputRowProps) => {
             <SelectValue placeholder="Action" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="add">Add</SelectItem>
+            <SelectItem value="insert">Insert</SelectItem>
             <SelectItem value="remove">Remove</SelectItem>
           </SelectContent>
         </Select>
@@ -257,7 +257,7 @@ const InputRow = (props: InputRowProps) => {
       <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
       <Input placeholder="Value" value={row.value} onChange={(e) => handleValueChange(index, e.target.value)} />
       {/* Add Button */}
-      <Button variant="ghost" onClick={() => handleAddRow(index)} disabled={!row.action || !row.key || !row.value}>
+      <Button variant="ghost" onClick={() => handleInsertRow(index)} disabled={!row.action || !row.key || !row.value}>
         <PlusIcon className="w-4 h-4" />
       </Button>
       {/* No drag handle here */}
