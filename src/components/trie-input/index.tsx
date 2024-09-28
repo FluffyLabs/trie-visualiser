@@ -9,6 +9,7 @@ import { PlusIcon, MinusIcon, GripVerticalIcon, EyeIcon } from "lucide-react";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Textarea } from "../ui/textarea";
 
 // Define the type for a row
 export interface Row {
@@ -129,47 +130,45 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   const unsubmittedRows = rows.filter((row) => !row.isSubmitted);
 
   return (
-    <div>
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={submittedRows.map((row) => row.id)} strategy={verticalListSortingStrategy}>
-          {submittedRows.map((row) => {
-            // Get the index in the original rows array
-            const index = rows.findIndex((r) => r.id === row.id);
-            return (
-              <SortableItem
-                key={row.id}
-                id={row.id}
-                index={index}
-                row={row}
-                handleSelectChange={handleSelectChange}
-                handleKeyChange={handleKeyChange}
-                handleValueChange={handleValueChange}
-                handleInsertRow={handleInsertRow}
-                handleRemoveRow={handleRemoveRow}
-                handleEyeIconClick={handleEyeIconClick}
-                eyeIconRowId={eyeIconRowId}
-              />
-            );
-          })}
-        </SortableContext>
-
-        {/* Render the unsubmitted row(s) without sortable functionality */}
-        {unsubmittedRows.map((row) => {
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={submittedRows.map((row) => row.id)} strategy={verticalListSortingStrategy}>
+        {submittedRows.map((row) => {
+          // Get the index in the original rows array
           const index = rows.findIndex((r) => r.id === row.id);
           return (
-            <InputRow
+            <SortableItem
               key={row.id}
+              id={row.id}
               index={index}
               row={row}
               handleSelectChange={handleSelectChange}
               handleKeyChange={handleKeyChange}
               handleValueChange={handleValueChange}
               handleInsertRow={handleInsertRow}
+              handleRemoveRow={handleRemoveRow}
+              handleEyeIconClick={handleEyeIconClick}
+              eyeIconRowId={eyeIconRowId}
             />
           );
         })}
-      </DndContext>
-    </div>
+      </SortableContext>
+
+      {/* Render the unsubmitted row(s) without sortable functionality */}
+      {unsubmittedRows.map((row) => {
+        const index = rows.findIndex((r) => r.id === row.id);
+        return (
+          <InputRow
+            key={row.id}
+            index={index}
+            row={row}
+            handleSelectChange={handleSelectChange}
+            handleKeyChange={handleKeyChange}
+            handleValueChange={handleValueChange}
+            handleInsertRow={handleInsertRow}
+          />
+        );
+      })}
+    </DndContext>
   );
 };
 
@@ -199,37 +198,43 @@ function SortableItem(props: SortableItemProps): JSX.Element {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex space-x-2 items-center my-2">
-      <div className="w-[150px]">
-        <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
-          <SelectTrigger className="w-24">
-            <SelectValue placeholder="Action" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="insert">Insert</SelectItem>
-            <SelectItem value="remove">Remove</SelectItem>
-          </SelectContent>
-        </Select>
+    <div ref={setNodeRef} style={style} className="flex my-5">
+      <div>
+        {/* Drag Handle */}
+        <Button variant="ghost" className="mr-1 px-1" {...attributes} {...listeners}>
+          <GripVerticalIcon className="w-4 h-4 cursor-move" />
+        </Button>
       </div>
-      <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
-      <Input
-        placeholder="Value"
-        disabled={row.action === "remove"}
-        value={row.value}
-        onChange={(e) => handleValueChange(index, e.target.value)}
-      />
-      {/* Eye Icon */}
-      <Button variant="ghost" onClick={() => props.handleEyeIconClick(id)}>
-        <EyeIcon className={`w-4 h-4 ${isEyeActive ? "text-blue-500" : ""}`} />
-      </Button>
-      {/* Drag Handle */}
-      <Button variant="ghost" {...attributes} {...listeners}>
-        <GripVerticalIcon className="w-4 h-4 cursor-move" />
-      </Button>
-      {/* Remove Button */}
-      <Button variant="ghost" onClick={() => handleRemoveRow(index)}>
-        <MinusIcon className="w-4 h-4" />
-      </Button>
+      <div className="flex-col">
+        <div className="flex items-center mb-2">
+          <div className="w-[150px]">
+            <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="Action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="insert">Insert</SelectItem>
+                <SelectItem value="remove">Remove</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
+          {/* Eye Icon */}
+          <Button variant="ghost" onClick={() => props.handleEyeIconClick(id)}>
+            <EyeIcon className={`w-4 h-4 ${isEyeActive ? "text-blue-500" : ""}`} />
+          </Button>
+          {/* Remove Button */}
+          <Button variant="ghost" onClick={() => handleRemoveRow(index)}>
+            <MinusIcon className="w-4 h-4" />
+          </Button>
+        </div>
+        <Textarea
+          placeholder="Value"
+          disabled={row.action === "remove"}
+          value={row.value}
+          onChange={(e) => handleValueChange(index, e.target.value)}
+        />
+      </div>
     </div>
   );
 }
