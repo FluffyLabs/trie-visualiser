@@ -16,6 +16,7 @@ const DEFAULT_ROWS_DATA: Row[] = [
       "bb11c256876fe10442213dd78714793394d2016134c28a64eb27376ddc147fc6044df72bdea44d9ec66a3ea1e6d523f7de71db1d05a980e001e9fa",
     isSubmitted: true,
     isHidden: false,
+    isEditing: false,
   },
   {
     id: "2",
@@ -24,6 +25,7 @@ const DEFAULT_ROWS_DATA: Row[] = [
     value: "b8bded4e1c",
     isSubmitted: true,
     isHidden: false,
+    isEditing: false,
   },
 ];
 
@@ -77,7 +79,7 @@ export const TriePage = () => {
           </div>
           {error && <div className="text-red-500">{error}</div>}
         </div>
-        <div style={{ maxHeight: "calc(100% - 40px)" }} className="overflow-y-scroll">
+        <div style={{ maxHeight: "calc(100% - 40px)" }} className="verflow-y-scroll">
           <TrieInput initialRows={rowsData} onChange={onChange} />
         </div>
       </div>
