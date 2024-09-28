@@ -15,6 +15,7 @@ const DEFAULT_ROWS_DATA: Row[] = [
     value:
       "bb11c256876fe10442213dd78714793394d2016134c28a64eb27376ddc147fc6044df72bdea44d9ec66a3ea1e6d523f7de71db1d05a980e001e9fa",
     isSubmitted: true,
+    isHidden: false,
   },
   {
     id: "2",
@@ -22,6 +23,7 @@ const DEFAULT_ROWS_DATA: Row[] = [
     key: "df08871e8a54fde4834d83851469e635713615ab1037128df138a6cd223f1242",
     value: "b8bded4e1c",
     isSubmitted: true,
+    isHidden: false,
   },
 ];
 

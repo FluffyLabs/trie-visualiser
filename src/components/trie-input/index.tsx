@@ -18,32 +18,51 @@ export interface Row {
   key: string;
   value: string;
   isSubmitted: boolean;
+  isHidden: boolean; // Property to track temporary removal
 }
 
 type TrieInputProps = {
   initialRows?: Row[];
-
   onChange: (value: Row[]) => void;
 };
 
 export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   // Initialize state with one empty row
-  const [rows, setRows] = useState<Row[]>([{ id: "1", action: "", key: "", value: "", isSubmitted: false }]);
-  const [eyeIconRowId, setEyeIconRowId] = useState<string | null>(null);
+  const [rows, setRows] = useState<Row[]>([
+    {
+      id: "1",
+      action: "",
+      key: "",
+      value: "",
+      isSubmitted: false,
+      isHidden: false,
+    },
+  ]);
 
   useEffect(() => {
     if (initialRows && initialRows.length > 0) {
       setRows([
-        ...initialRows,
-        { id: (initialRows.length + 1).toString(), action: "", key: "", value: "", isSubmitted: false },
+        ...initialRows.map((row) => ({ ...row, isHidden: false })), // Ensure isHidden is set to false
+        {
+          id: (initialRows.length + 1).toString(),
+          action: "",
+          key: "",
+          value: "",
+          isSubmitted: false,
+          isHidden: false,
+        },
       ]);
     }
   }, [initialRows]);
 
   const modifyRows = (newRows: Row[]) => {
     setRows(newRows);
-    onChange(newRows.filter((row) => row.isSubmitted));
+    // Emit rows excluding the hidden ones
+    onChange(newRows.filter((row) => row.isSubmitted && !row.isHidden));
   };
+
+  // Event handlers remain the same...
+  // (handleSelectChange, handleKeyChange, handleValueChange, etc.)
 
   // Handle changes in the Select component
   const handleSelectChange = (index: number, value: string): void => {
@@ -76,6 +95,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
       key: "",
       value: "",
       isSubmitted: false,
+      isHidden: false,
     });
     modifyRows(newRows);
   };
@@ -85,10 +105,6 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
     const newRows = [...rows];
     newRows.splice(index, 1);
     modifyRows(newRows);
-    // If the removed row had the eye icon active, reset it
-    if (eyeIconRowId && newRows.findIndex((row) => row.id === eyeIconRowId) === -1) {
-      setEyeIconRowId(null);
-    }
   };
 
   // Handle drag end
@@ -107,27 +123,18 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
     }
   };
 
-  // Handle eye icon click
-  const handleEyeIconClick = (rowId: string): void => {
-    if (eyeIconRowId === rowId) {
-      // Uncheck the eye icon
-      setEyeIconRowId(null);
-      onChange(rows.filter((row) => row.isSubmitted));
-    } else {
-      // Set the eye icon to this row
-      setEyeIconRowId(rowId);
-      const index = rows.findIndex((row) => row.id === rowId);
-      if (index !== -1) {
-        const emittedRows = rows.slice(0, index + 1);
-        console.log("emittedRows", emittedRows);
-        onChange(emittedRows.filter((row) => row.isSubmitted));
-      }
-    }
+  // Handle eye icon click (temporary removal)
+  const handleEyeIconClick = (index: number): void => {
+    const newRows = [...rows];
+    newRows[index].isHidden = !newRows[index].isHidden; // Toggle the isHidden state
+    modifyRows(newRows);
   };
 
   // Separate submitted and unsubmitted rows
   const submittedRows = rows.filter((row) => row.isSubmitted);
   const unsubmittedRows = rows.filter((row) => !row.isSubmitted);
+
+  let rowIndex = 0; // Initialize row index
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -135,6 +142,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
         {submittedRows.map((row) => {
           // Get the index in the original rows array
           const index = rows.findIndex((r) => r.id === row.id);
+          const currentRowIndex = rowIndex++;
           return (
             <SortableItem
               key={row.id}
@@ -147,7 +155,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
               handleInsertRow={handleInsertRow}
               handleRemoveRow={handleRemoveRow}
               handleEyeIconClick={handleEyeIconClick}
-              eyeIconRowId={eyeIconRowId}
+              rowNumber={currentRowIndex} // Pass the overall row number
             />
           );
         })}
@@ -156,6 +164,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
       {/* Render the unsubmitted row(s) without sortable functionality */}
       {unsubmittedRows.map((row) => {
         const index = rows.findIndex((r) => r.id === row.id);
+        const currentRowIndex = rowIndex++;
         return (
           <InputRow
             key={row.id}
@@ -165,6 +174,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
             handleKeyChange={handleKeyChange}
             handleValueChange={handleValueChange}
             handleInsertRow={handleInsertRow}
+            rowNumber={currentRowIndex} // Pass the overall row number
           />
         );
       })}
@@ -172,6 +182,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
   );
 };
 
+// SortableItem Component
 interface SortableItemProps {
   id: string;
   index: number;
@@ -181,14 +192,22 @@ interface SortableItemProps {
   handleValueChange: (index: number, value: string) => void;
   handleInsertRow: (index: number) => void;
   handleRemoveRow: (index: number) => void;
-  handleEyeIconClick: (rowId: string) => void;
-
-  eyeIconRowId: string | null;
+  handleEyeIconClick: (index: number) => void;
+  rowNumber: number; // New prop for alternating background
 }
 
 function SortableItem(props: SortableItemProps): JSX.Element {
-  const { id, index, row, handleSelectChange, handleKeyChange, handleValueChange, handleRemoveRow } = props;
-  const isEyeActive = props.eyeIconRowId === id;
+  const {
+    id,
+    index,
+    row,
+    handleSelectChange,
+    handleKeyChange,
+    handleValueChange,
+    handleRemoveRow,
+    handleEyeIconClick,
+    rowNumber,
+  } = props;
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
@@ -197,18 +216,24 @@ function SortableItem(props: SortableItemProps): JSX.Element {
     transition: transition || undefined,
   };
 
+  const backgroundClass = rowNumber % 2 === 0 ? "bg-white" : "bg-gray-100";
+
   return (
-    <div ref={setNodeRef} style={style} className="flex my-5">
+    <div ref={setNodeRef} style={style} className={`flex p-3 ${row.isHidden ? "opacity-50" : ""} ${backgroundClass}`}>
       <div>
         {/* Drag Handle */}
         <Button variant="ghost" className="mr-1 px-1" {...attributes} {...listeners}>
           <GripVerticalIcon className="w-4 h-4 cursor-move" />
         </Button>
       </div>
-      <div className="flex-col">
+      <div className="flex-col w-full">
         <div className="flex items-center mb-2">
           <div className="w-[150px]">
-            <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
+            <Select
+              onValueChange={(value) => handleSelectChange(index, value)}
+              value={row.action}
+              disabled={row.isHidden}
+            >
               <SelectTrigger className="w-24">
                 <SelectValue placeholder="Action" />
               </SelectTrigger>
@@ -218,10 +243,15 @@ function SortableItem(props: SortableItemProps): JSX.Element {
               </SelectContent>
             </Select>
           </div>
-          <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
+          <Input
+            placeholder="Key"
+            value={row.key}
+            onChange={(e) => handleKeyChange(index, e.target.value)}
+            disabled={row.isHidden}
+          />
           {/* Eye Icon */}
-          <Button variant="ghost" onClick={() => props.handleEyeIconClick(id)}>
-            <EyeIcon className={`w-4 h-4 ${isEyeActive ? "text-blue-500" : ""}`} />
+          <Button variant="ghost" onClick={() => handleEyeIconClick(index)}>
+            <EyeIcon className={`w-4 h-4 ${row.isHidden ? "text-gray-500" : ""}`} />
           </Button>
           {/* Remove Button */}
           <Button variant="ghost" onClick={() => handleRemoveRow(index)}>
@@ -230,7 +260,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
         </div>
         <Textarea
           placeholder="Value"
-          disabled={row.action === "remove"}
+          disabled={row.action === "remove" || row.isHidden}
           value={row.value}
           onChange={(e) => handleValueChange(index, e.target.value)}
         />
@@ -239,6 +269,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
   );
 }
 
+// InputRow Component
 interface InputRowProps {
   index: number;
   row: Row;
@@ -246,13 +277,16 @@ interface InputRowProps {
   handleKeyChange: (index: number, value: string) => void;
   handleValueChange: (index: number, value: string) => void;
   handleInsertRow: (index: number) => void;
+  rowNumber: number; // New prop for alternating background
 }
 
 const InputRow = (props: InputRowProps) => {
-  const { index, row, handleSelectChange, handleKeyChange, handleValueChange, handleInsertRow } = props;
+  const { index, row, handleSelectChange, handleKeyChange, handleValueChange, handleInsertRow, rowNumber } = props;
+
+  const backgroundClass = rowNumber % 2 === 0 ? "bg-white" : "bg-gray-100";
 
   return (
-    <div className="flex space-x-2 items-center my-2">
+    <div className={`flex space-x-2 items-center my-2 ${backgroundClass}`}>
       <div className="w-[150px]">
         <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
           <SelectTrigger className="w-24">
@@ -267,7 +301,11 @@ const InputRow = (props: InputRowProps) => {
       <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
       <Input placeholder="Value" value={row.value} onChange={(e) => handleValueChange(index, e.target.value)} />
       {/* Add Button */}
-      <Button variant="ghost" onClick={() => handleInsertRow(index)} disabled={!row.action || !row.key || !row.value}>
+      <Button
+        variant="ghost"
+        onClick={() => handleInsertRow(index)}
+        disabled={!row.action || !row.key || (row.action === "insert" && !row.value)}
+      >
         <PlusIcon className="w-4 h-4" />
       </Button>
       {/* No drag handle here */}
