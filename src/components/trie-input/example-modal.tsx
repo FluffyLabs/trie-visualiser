@@ -25,6 +25,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
             "bb11c256876fe10442213dd78714793394d2016134c28a64eb27376ddc147fc6044df72bdea44d9ec66a3ea1e6d523f7de71db1d05a980e001e9fa",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "2",
@@ -33,6 +34,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
           value: "b8bded4e1c",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "3",
@@ -41,6 +43,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
           value: "e46ddd41a5960807d528f5d9282568e622a023b94b72cb63f0353baff189257d",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "4",
@@ -49,6 +52,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
           value: "9bc5d0",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "5",
@@ -57,6 +61,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
           value: "9ae1dc59670bd3ef6fb51cbbbc05f1d2635fd548cb31f72500000a",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "6",
@@ -65,6 +70,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
           value: "0964801caa928bc8c1869d60dbf1d8233233e0261baf725f2631d2b27574efc0316ce3067b4fccfa607274",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "7",
@@ -73,6 +79,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
           value: "4881dd3238fd6c8af1090d455e7b449a",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "8",
@@ -82,6 +89,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
             "d1fddfd63fd00cd6749a441b6ceaea1f250982a3a6b6d38f1b40cae00972cce3f9f4eaf7f9d7bc3070bd1e8d088500b10ca72e5ed5956f62",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "9",
@@ -91,6 +99,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
             "e8256c6b5a9623cf2b293090f78f8fbceea6fc3991ac5f872400608f14d2a8b3d494fcda1c51d93b9904e3242cdeaa4b227c68cea89cca05ab6b5296edf105",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
         {
           id: "10",
@@ -100,6 +109,7 @@ function ExampleModal({ onSelect }: ExampleModalProps): JSX.Element {
             "cd759a8d88edb46dda489a45ba6e48a42ce7efd36f1ca31d3bdfa40d2091f27740c5ec5de746d90d9841b986f575d545d0fb642398914eaab5",
           isSubmitted: true,
           isHidden: false,
+          isEditing: false,
         },
       ],
     },
