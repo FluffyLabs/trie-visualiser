@@ -79,7 +79,7 @@ export const TriePage = () => {
           </div>
           {error && <div className="text-red-500">{error}</div>}
         </div>
-        <div style={{ maxHeight: "calc(100% - 40px)" }} className="verflow-y-scroll">
+        <div style={{ maxHeight: "calc(100% - 40px)" }} className="overflow-y-scroll">
           <TrieInput initialRows={rowsData} onChange={onChange} />
         </div>
       </div>
