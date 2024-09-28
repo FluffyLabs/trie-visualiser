@@ -200,6 +200,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
               return "#55b3f3";
             },
             color: "#fff",
+            "font-family": "monospace",
             "font-size": "26px",
             "border-width": 2,
             "border-color": "#333",
