@@ -6,6 +6,7 @@ import { parseStateKey, trieToTreeUI } from "@/components/trie/utils";
 import { InMemoryTrieType } from "@/types/trie";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
 import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const DEFAULT_ROWS_DATA: Row[] = [
   {
@@ -46,7 +47,8 @@ export const TriePage = () => {
   const [rowsData, setRowsData] = useState<Row[]>(DEFAULT_ROWS_DATA);
   const [trie, setTrie] = useState<InMemoryTrieType>(getTrie(DEFAULT_ROWS_DATA));
   const [error, setError] = useState<string>();
-  const data = trie && trieToTreeUI(trie.root, trie.nodes);
+  const [hideEmpty, setHideEmpty] = useState<boolean>(false);
+  const data = trie && trieToTreeUI(trie.root, trie.nodes, hideEmpty);
 
   const onChange = (rows: Row[]) => {
     const input = rows.map(({ key, value, action }) => ({ key, value, action }));
@@ -78,6 +80,15 @@ export const TriePage = () => {
             />
           </div>
           {error && <div className="text-red-500">{error}</div>}
+        </div>
+        <div className="flex items-center space-x-2 my-3">
+          <Checkbox id="hideEmpty" onCheckedChange={(ev) => setHideEmpty(ev as boolean)} />
+          <label
+            htmlFor="terms"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Hide empty nodes
+          </label>
         </div>
         <div style={{ maxHeight: "calc(100% - 40px)" }} className="overflow-y-scroll">
           <TrieInput initialRows={rowsData} onChange={onChange} />

@@ -37,7 +37,7 @@ type TrieInputProps = {
 };
 
 export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
-  // Initialize state with one empty row
+  // Initialize state with submitted rows and a single unsubmitted row
   const [rows, setRows] = useState<Row[]>([
     {
       id: "1",
@@ -52,6 +52,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
 
   useEffect(() => {
     if (initialRows && initialRows.length > 0) {
+      const lastId = parseInt(initialRows[initialRows.length - 1].id);
       setRows([
         ...initialRows.map((row) => ({
           ...row,
@@ -59,7 +60,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
           isEditing: false,
         })), // Ensure properties are set
         {
-          id: (initialRows.length + 1).toString(),
+          id: (lastId + 1).toString(),
           action: "",
           key: "",
           value: "",
@@ -98,12 +99,14 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
     modifyRows(newRows);
   };
 
-  // Handle adding a new row
+  // Handle adding a new row (only when the plus icon is clicked)
   const handleInsertRow = (index: number): void => {
     const newRows = [...rows];
     newRows[index].isSubmitted = true;
+
+    // Create a new unsubmitted row
     newRows.push({
-      id: (parseInt(rows[rows.length - 1].id) + 1).toString(),
+      id: (parseInt(newRows[newRows.length - 1].id) + 1).toString(),
       action: "",
       key: "",
       value: "",
@@ -111,6 +114,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
       isHidden: false,
       isEditing: false,
     });
+
     modifyRows(newRows);
   };
 
@@ -138,9 +142,9 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
       const newIndex = submittedRows.findIndex((row) => row.id === over.id);
       const newSubmittedRows = arrayMove(submittedRows, oldIndex, newIndex);
 
-      // Merge back with the unsubmitted row(s)
-      const unsubmittedRows = rows.filter((row) => !row.isSubmitted);
-      modifyRows([...newSubmittedRows, ...unsubmittedRows]);
+      // Keep the unsubmitted row at the end
+      const unsubmittedRow = rows.find((row) => !row.isSubmitted);
+      modifyRows([...newSubmittedRows, unsubmittedRow!]);
     }
   };
 
@@ -153,7 +157,7 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
 
   // Separate submitted and unsubmitted rows
   const submittedRows = rows.filter((row) => row.isSubmitted);
-  const unsubmittedRows = rows.filter((row) => !row.isSubmitted);
+  const unsubmittedRow = rows.find((row) => !row.isSubmitted);
 
   let rowIndex = 0; // Initialize row index
 
@@ -183,23 +187,18 @@ export const TrieInput = ({ onChange, initialRows }: TrieInputProps) => {
         })}
       </SortableContext>
 
-      {/* Render the unsubmitted row(s) without sortable functionality */}
-      {unsubmittedRows.map((row) => {
-        const index = rows.findIndex((r) => r.id === row.id);
-        const currentRowIndex = rowIndex++;
-        return (
-          <InputRow
-            key={row.id}
-            index={index}
-            row={row}
-            handleSelectChange={handleSelectChange}
-            handleKeyChange={handleKeyChange}
-            handleValueChange={handleValueChange}
-            handleInsertRow={handleInsertRow}
-            rowNumber={currentRowIndex} // Pass the overall row number
-          />
-        );
-      })}
+      {/* Render the single unsubmitted InputRow */}
+      {unsubmittedRow && (
+        <InputRow
+          index={rows.findIndex((r) => r.id === unsubmittedRow.id)}
+          row={unsubmittedRow}
+          handleSelectChange={handleSelectChange}
+          handleKeyChange={handleKeyChange}
+          handleValueChange={handleValueChange}
+          handleInsertRow={handleInsertRow}
+          rowNumber={rowIndex} // Pass the overall row number
+        />
+      )}
     </DndContext>
   );
 };
@@ -251,7 +250,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
         </Button>
       </div>
       <div className="flex-col w-full">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           {row.isEditing ? (
             <>
               <div className="w-[150px]">
@@ -276,7 +275,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
               <div className="w-[150px]">
                 <span className="w-24 capitalize">{row.action}</span>
               </div>
-              <span className="w-full">{truncateString(row.key)}</span> {/* Updated here */}
+              <span className="w-full">{truncateString(row.key)}</span>
               {/* More Icon with Dropdown Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -320,7 +319,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
   );
 }
 
-// InputRow Component remains the same as before
+// InputRow Component
 interface InputRowProps {
   index: number;
   row: Row;
@@ -330,6 +329,7 @@ interface InputRowProps {
   handleInsertRow: (index: number) => void;
   rowNumber: number; // New prop for alternating background
 }
+
 const InputRow = (props: InputRowProps) => {
   const { index, row, handleSelectChange, handleKeyChange, handleValueChange, handleInsertRow, rowNumber } = props;
 
@@ -338,7 +338,7 @@ const InputRow = (props: InputRowProps) => {
   return (
     <div className={`flex p-2 ${backgroundClass}`}>
       <div className="flex-col w-full">
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center">
           <div className="w-[150px]">
             <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
               <SelectTrigger className="w-24">
