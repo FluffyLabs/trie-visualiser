@@ -89,8 +89,7 @@ const buildCytoscapeGraphData = (
 
   // Ensure each node only connects to its direct children
   if (node.children && node.children.length > 0) {
-    const limitedChildren = node.children.slice(0, 2); // Limit to two child nodes
-    limitedChildren.forEach((child, childIndex) => {
+    node.children.forEach((child, childIndex) => {
       buildCytoscapeGraphData(child, uniqueId, childIndex, elements); // Pass the current node's ID as the parentId
     });
   }
@@ -111,19 +110,32 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
   useEffect(() => {
     if (cyInstance) {
       const layout = cyInstance.layout({
-        // name: "breadthfirst", // Hierarchical layout
-        // directed: true, // Ensures child nodes are below parent nodes
-        // padding: 1, // Padding around the layout
-        // spacingFactor: 1.5, // Increase spacing between nodes
-        // avoidOverlap: true, // Prevent nodes from overlapping
-        // animate: true, // Animate the layout changes
+        name: "breadthfirst", // Hierarchical layout
+        directed: true, // Ensures child nodes are below parent nodes
+        padding: 1, // Padding around the layout
+        spacingFactor: 1.2, // Increase spacing between nodes
+        avoidOverlap: true, // Prevent nodes from overlapping
+        animate: true, // Animate the layout changes
+        circle: false, // Disable circle layout
         // grid: true,
         // name: "dagre",
-        animate: true,
+        // animate: true,
         animationDuration: 1000,
-        name: "elk",
+        // name: "breadthfirst",
+        acyclicer: "greedy",
+        ranker: "tight-tree",
+        rankDir: "TB", // Top-to-bottom layout direction
+        // align: "UL", // Align nodes to the left, ensuring children are ordered
+        nodeSep: 50, // Space between nodes
+        edgeSep: 50, // Space between edges
+        rankSep: 100, // Space between ranks (levels of hierarchy),
+        disableOptimalOrderHeuristic: true,
+        sort: () => 1,
         elk: {
           algorithm: "mrtree",
+          "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+          // "org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment": "LEFT", // Align first child to the left, second to the right
+
           //   "elk.spacing.nodeNode": 10,
           //   "elk.padding": new ElkPadding(),
         },

@@ -251,7 +251,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
         </Button>
       </div>
       <div className="flex-col w-full">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center gap-1">
           {row.isEditing ? (
             <>
               <div className="w-[150px]">
@@ -299,7 +299,7 @@ function SortableItem(props: SortableItemProps): JSX.Element {
               disabled={row.action === "remove"}
               value={row.value}
               onChange={(e) => handleValueChange(index, e.target.value)}
-              className="flex-1"
+              className="flex-1 mt-1"
             />
             {/* Eye Icon */}
             <Button variant="ghost" onClick={() => handleEyeIconClick(index)}>
@@ -330,36 +330,46 @@ interface InputRowProps {
   handleInsertRow: (index: number) => void;
   rowNumber: number; // New prop for alternating background
 }
-
 const InputRow = (props: InputRowProps) => {
   const { index, row, handleSelectChange, handleKeyChange, handleValueChange, handleInsertRow, rowNumber } = props;
 
   const backgroundClass = rowNumber % 2 === 0 ? "bg-white" : "bg-gray-100";
 
   return (
-    <div className={`flex space-x-2 items-center my-2 ${backgroundClass}`}>
-      <div className="w-[150px]">
-        <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
-          <SelectTrigger className="w-24">
-            <SelectValue placeholder="Action" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="insert">Insert</SelectItem>
-            <SelectItem value="remove">Remove</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className={`flex p-2 ${backgroundClass}`}>
+      <div className="flex-col w-full">
+        <div className="flex gap-1 items-center">
+          <div className="w-[150px]">
+            <Select onValueChange={(value) => handleSelectChange(index, value)} value={row.action}>
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="Action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="insert">Insert</SelectItem>
+                <SelectItem value="remove">Remove</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
+          {/* Add Button */}
+          <Button
+            variant="ghost"
+            onClick={() => handleInsertRow(index)}
+            disabled={!row.action || !row.key || (row.action === "insert" && !row.value)}
+          >
+            <PlusIcon className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex items-center">
+          <Textarea
+            placeholder="Value"
+            disabled={row.action === "remove"}
+            value={row.value}
+            onChange={(e) => handleValueChange(index, e.target.value)}
+            className="flex-1 mt-1"
+          />
+        </div>
       </div>
-      <Input placeholder="Key" value={row.key} onChange={(e) => handleKeyChange(index, e.target.value)} />
-      <Input placeholder="Value" value={row.value} onChange={(e) => handleValueChange(index, e.target.value)} />
-      {/* Add Button */}
-      <Button
-        variant="ghost"
-        onClick={() => handleInsertRow(index)}
-        disabled={!row.action || !row.key || (row.action === "insert" && !row.value)}
-      >
-        <PlusIcon className="w-4 h-4" />
-      </Button>
-      {/* No drag handle here */}
     </div>
   );
 };
