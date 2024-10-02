@@ -6,7 +6,7 @@ export const truncateString = (str: string, maxLength: number = 20) =>
   str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
 
 const shouldRenderNode = (node: TrieHash, hideEmpty: boolean) => {
-  return hideEmpty ? true : node.toString() !== "0x0000000000000000000000000000000000000000000000000000000000000000";
+  return hideEmpty ? node.toString() !== "0x0000000000000000000000000000000000000000000000000000000000000000" : true;
 };
 export function trieToTreeUI(
   root: TrieNodeType | null,

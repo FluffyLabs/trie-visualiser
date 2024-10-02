@@ -90,7 +90,7 @@ export const TriePage = () => {
             Hide empty nodes
           </label>
         </div>
-        <div style={{ maxHeight: "calc(100% - 40px)" }} className="overflow-y-scroll">
+        <div style={{ maxHeight: "calc(100% - 70px)" }} className="overflow-y-scroll">
           <TrieInput initialRows={rowsData} onChange={onChange} />
         </div>
       </div>

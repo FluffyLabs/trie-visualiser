@@ -10,34 +10,36 @@ import "tippy.js/dist/tippy.css"; // For styling
 import "tippy.js/themes/light-border.css";
 import "tippy.js/animations/scale.css";
 
-// Use Dagre and ELK layouts for Cytoscape
 cytoscape.use(dagre);
 cytoscape.use(elk);
 
-// Tippy factory for popovers (tooltips)
 function tippyFactory(ref: { getBoundingClientRect: GetReferenceClientRect }, content: HTMLElement) {
+  // Since tippy constructor requires DOM element/elements, create a placeholder
   const dummyDomEle = document.createElement("div");
 
   const tip = tippy(dummyDomEle, {
     theme: "light-border",
     animation: "scale",
     getReferenceClientRect: ref.getBoundingClientRect,
-    trigger: "manual",
+    trigger: "manual", // mandatory
+    // dom element inside the tippy:
     content: content,
     maxWidth: "none",
+    // your own preferences:
     arrow: true,
     placement: "top",
     hideOnClick: false,
     sticky: "reference",
+
+    // if interactive:
     interactive: true,
-    appendTo: document.body,
+    appendTo: document.body, // or append dummyDomEle to document.body
   });
 
   return tip;
 }
 
 cytoscape.use(cytoscapePopper(tippyFactory));
-
 export interface TreeNode {
   name: string;
   children?: TreeNode[];
@@ -51,12 +53,13 @@ interface GraphComponentProps {
 const nodeWidth = 200;
 const nodeHeight = 50;
 
-// Generate a unique ID based on the node's position in the tree
+// Generate a unique ID based on the node's name and some identifier
 const generateNodeId = (_node: TreeNode, parentId: string | null, index: number): string => {
+  // You can change this logic based on your requirements
   return parentId ? `${parentId}-${index}` : `root-${index}`;
 };
 
-// Build Cytoscape graph data from treeData, ensuring each node is only connected to its children
+// Build Cytoscape graph data from treeData, ensuring each node is only connected to its own children
 const buildCytoscapeGraphData = (
   node: TreeNode,
   parentId: string | null = null,
@@ -65,10 +68,10 @@ const buildCytoscapeGraphData = (
 ) => {
   const uniqueId = generateNodeId(node, parentId, index);
 
-  // Insert the node into elements
+  // Insert the node to elements
   elements.push({
     data: {
-      id: uniqueId,
+      id: uniqueId, // Unique ID for Cytoscape
       label: node.attributes
         ? `${node.name}\n${Object.entries(node.attributes)
             .map(([key, val]) => `${key}: ${val}`)
@@ -84,7 +87,7 @@ const buildCytoscapeGraphData = (
     });
   }
 
-  // Ensure each node connects to its direct children
+  // Ensure each node only connects to its direct children
   if (node.children && node.children.length > 0) {
     node.children.forEach((child, childIndex) => {
       buildCytoscapeGraphData(child, uniqueId, childIndex, elements); // Pass the current node's ID as the parentId
@@ -103,29 +106,38 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
     setElements(graphElements);
   }, [treeData]);
 
-  // Layout and node tooltip creation
+  // Update the layout when elements change
   useEffect(() => {
     if (cyInstance) {
       const layout = cyInstance.layout({
-        name: "breadthfirst", // Hierarchical layout
+        name: "elk", // Hierarchical layout
         directed: true, // Ensures child nodes are below parent nodes
         padding: 1, // Padding around the layout
         spacingFactor: 1.2, // Increase spacing between nodes
         avoidOverlap: true, // Prevent nodes from overlapping
         animate: true, // Animate the layout changes
         circle: false, // Disable circle layout
+        // grid: true,
+        // name: "dagre",
+        // animate: true,
         animationDuration: 1000,
+        // name: "breadthfirst",
         acyclicer: "greedy",
         ranker: "tight-tree",
         rankDir: "TB", // Top-to-bottom layout direction
+        // align: "UL", // Align nodes to the left, ensuring children are ordered
         nodeSep: 50, // Space between nodes
         edgeSep: 50, // Space between edges
-        rankSep: 100, // Space between ranks (levels of hierarchy)
+        rankSep: 100, // Space between ranks (levels of hierarchy),
         disableOptimalOrderHeuristic: true,
-        sort: () => 1, // Ensure sorting consistency
+        sort: () => 1,
         elk: {
           algorithm: "mrtree",
           "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+          // "org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment": "LEFT", // Align first child to the left, second to the right
+
+          //   "elk.spacing.nodeNode": 10,
+          //   "elk.padding": new ElkPadding(),
         },
       } as BaseLayoutOptions);
 
@@ -136,12 +148,8 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         const tip = node.popper({
           content: () => {
             const content = document.createElement("div");
-            content.innerHTML = `Hash: ${node
-              .data("label")
-              .split("value")
-              .join("<br> Value")
-              .split("valueHash")
-              .join("<br> ValueHash")}`;
+            content.innerHTML = `Hash: ${node.data("label").split("value").join("<br> Value").split("valueHash").join("<br> ValueHash")}`;
+
             return content;
           },
         });
@@ -162,9 +170,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
           }
         });
       });
-
       layout.run();
-
       // Cleanup tooltips and listeners on component unmount or element change
       return () => {
         tippyInstances.forEach((tip) => {
