@@ -196,7 +196,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
             width: nodeWidth,
             height: nodeHeight,
             label: function (element: { data: (arg0: string) => string }) {
-              return truncateString(element.data("label"), 20);
+              return truncateString(element.data("label").split("value")[0].split("valueHash")[0], 20);
             },
             "text-valign": "center",
             "text-halign": "center",
