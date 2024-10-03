@@ -9,6 +9,7 @@ import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
 import "tippy.js/themes/light-border.css";
 import "tippy.js/animations/scale.css";
+import "./index.scss";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
@@ -30,7 +31,6 @@ function tippyFactory(ref: { getBoundingClientRect: GetReferenceClientRect }, co
     placement: "top",
     hideOnClick: false,
     sticky: "reference",
-
     // if interactive:
     interactive: true,
     appendTo: document.body, // or append dummyDomEle to document.body
@@ -72,11 +72,8 @@ const buildCytoscapeGraphData = (
   elements.push({
     data: {
       id: uniqueId, // Unique ID for Cytoscape
-      label: node.attributes
-        ? `${node.name}\n${Object.entries(node.attributes)
-            .map(([key, val]) => `${key}: ${val}`)
-            .join(", ")}`
-        : node.name, // Display the name, even if not unique
+      label: node.name,
+      ...node.attributes,
     },
   });
 
@@ -148,7 +145,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         const tip = node.popper({
           content: () => {
             const content = document.createElement("div");
-            content.innerHTML = `Hash: ${node.data("label").split("value").join("<br> Value").split("valueHash").join("<br> ValueHash")}`;
+            content.innerHTML = `<strong>Hash:</strong> ${node.data("label")}<br>${node.data("valueHash") ? `<strong>Value hash:</strong> ${node.data("valueHash")}` : `<strong>Value:</strong> ${node.data("value")}`}<br><strong>Parent hash:</strong> ${node.data("parentHash")}`;
 
             return content;
           },
@@ -196,7 +193,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
             width: nodeWidth,
             height: nodeHeight,
             label: function (element: { data: (arg0: string) => string }) {
-              return truncateString(element.data("label").split("value")[0].split("valueHash")[0], 20);
+              return truncateString(element.data("label"), 20);
             },
             "text-valign": "center",
             "text-halign": "center",
@@ -205,7 +202,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
                 return "#c9c9c9";
               }
 
-              if (element.data("label").includes("value")) {
+              if (element.data("value") || element.data("valueHash")) {
                 return "#00bcd4";
               }
 
