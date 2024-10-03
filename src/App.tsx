@@ -6,7 +6,9 @@ function App() {
   return (
     <div className="flex flex-col relative" style={{ height: "100vh" }}>
       <Header />
-      <TriePage />
+      <div className="h-full" style={{ maxHeight: "calc(100% - 60px)" }}>
+        <TriePage />
+      </div>
     </div>
   );
 }

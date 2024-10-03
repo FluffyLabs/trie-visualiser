@@ -1,14 +1,18 @@
-import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType } from "../../types/trie";
-import { RawNodeDatum } from "react-d3-tree";
+import { TreeNode } from ".";
+import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType, TrieHash } from "../../types/trie";
 import { Bytes } from "@typeberry/trie";
 
 export const truncateString = (str: string, maxLength: number = 20) =>
   str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
 
+const shouldRenderNode = (node: TrieHash, hideEmpty: boolean) => {
+  return hideEmpty ? node.toString() !== "0x0000000000000000000000000000000000000000000000000000000000000000" : true;
+};
 export function trieToTreeUI(
   root: TrieNodeType | null,
   nodes: WriteableNodesDbType,
-): RawNodeDatum | RawNodeDatum[] | undefined {
+  hideEmpty: boolean,
+): TreeNode | undefined {
   if (root === null) {
     return undefined;
   }
@@ -18,30 +22,36 @@ export function trieToTreeUI(
     const branch = root.asBranchNode();
     const leftHash = branch.getLeft();
     const rightHash = branch.getRight();
-    const left = trieToTreeUI(nodes.get(leftHash), nodes);
-    const right = trieToTreeUI(nodes.get(rightHash), nodes);
+    const left = trieToTreeUI(nodes.get(leftHash), nodes, hideEmpty);
+    const right = trieToTreeUI(nodes.get(rightHash), nodes, hideEmpty);
+    const children = [];
+
+    if (shouldRenderNode(leftHash, hideEmpty)) {
+      children.push({
+        name: leftHash.toString(),
+        children:
+          Array.isArray(left) || left === undefined
+            ? left
+            : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
+              ? left.children
+              : [left],
+      });
+    }
+    if (shouldRenderNode(rightHash, hideEmpty)) {
+      children.push({
+        name: rightHash.toString(),
+        children:
+          Array.isArray(right) || right === undefined
+            ? right
+            : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
+              ? right.children
+              : [right],
+      });
+    }
+
     return {
       name: "Root",
-      children: [
-        {
-          name: leftHash.toString(),
-          children:
-            Array.isArray(left) || left === undefined
-              ? left
-              : nodes.get(leftHash)?.getNodeType() === NodeType.Branch
-                ? left.children
-                : [left],
-        },
-        {
-          name: rightHash.toString(),
-          children:
-            Array.isArray(right) || right === undefined
-              ? right
-              : nodes.get(rightHash)?.getNodeType() === NodeType.Branch
-                ? right.children
-                : [right],
-        },
-      ],
+      children,
     };
   }
 

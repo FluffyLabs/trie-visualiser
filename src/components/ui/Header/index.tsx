@@ -5,9 +5,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export const Header = () => {
   return (
     <div className="bg-[#55B3F3] w-full flex flex-row items-center justify-between p-1 h-16 overflow-hidden">
-      <img src={Logo} alt="FluffyLabs logo" className="w-[70px] ml-3" />
+      <a href="https://fluffylabs.dev">
+        <img src={Logo} alt="FluffyLabs logo" className="w-[70px] ml-3" />
+      </a>
       <div className="mr-3 text-white flex flex-row items-center justify-center gap-5">
-        <pre>Trie Visualiser</pre>
+        <pre>Trie Visualiser | Fluffy Labs</pre>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
