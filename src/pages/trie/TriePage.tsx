@@ -48,7 +48,7 @@ export const TriePage = () => {
   const [trie, setTrie] = useState<InMemoryTrieType>(getTrie(DEFAULT_ROWS_DATA));
   const [error, setError] = useState<string>();
   const [hideEmpty, setHideEmpty] = useState<boolean>(false);
-  const data = trie && trieToTreeUI(trie.root, trie.nodes, hideEmpty);
+  const data = trie && trieToTreeUI(trie.root, trie.getRoot(), trie.nodes, hideEmpty);
 
   const onChange = (rows: Row[]) => {
     const input = rows.map(({ key, value, action }) => ({ key, value, action }));
