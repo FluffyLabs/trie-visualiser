@@ -145,7 +145,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         const tip = node.popper({
           content: () => {
             const content = document.createElement("div");
-            content.innerHTML = `<strong>Hash:</strong> ${node.data("label")}<br>${node.data("valueHash") ? `<strong>Value hash:</strong> ${node.data("valueHash")}` : `<strong>Value:</strong> ${node.data("value")}`}<br><strong>Parent hash:</strong> ${node.data("parentHash")}`;
+            content.innerHTML = `<strong>Hash:</strong> ${node.data("label")}<br>${node.data("valueHash") ? `<strong>Value hash:</strong> ${node.data("valueHash")}` : `<strong>Value:</strong> ${node.data("value")}`}<br><strong>Key:</strong> ${node.data("key")}`;
 
             return content;
           },
