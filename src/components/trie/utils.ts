@@ -50,7 +50,7 @@ export function trieToTreeUI(
   const valueLength = leaf.getValueLength();
 
   return {
-    name: leaf.getKey().toString(),
+    name: hash.toString(),
     attributes: {
       key: leaf.getKey().toString()
       ...(valueLength > 0
