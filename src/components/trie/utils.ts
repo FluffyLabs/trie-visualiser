@@ -52,7 +52,7 @@ export function trieToTreeUI(
   return {
     name: leaf.getKey().toString(),
     attributes: {
-      parentHash: hash.toString(),
+      key: leaf.getKey().toString()
       ...(valueLength > 0
         ? { value: `${leaf.getValue()}; length: ${valueLength}` }
         : { valueHash: `${leaf.getValueHash()}` }),
