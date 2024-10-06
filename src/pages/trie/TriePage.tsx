@@ -68,7 +68,6 @@ export const TriePage = () => {
   const [hideEmpty, setHideEmpty] = useState<boolean>(false);
   const data = trie && trieToTreeUI(trie.root, trie.getRoot(), trie.nodes, hideEmpty);
 
-  console.log(data);
   const onChange = (rows: Row[]) => {
     const input = rows.map(({ key, value, action }) => ({ key, value, action }));
     if (input.length === 0) {
