@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape, { BaseLayoutOptions } from "cytoscape";
 import dagre from "cytoscape-dagre";
@@ -10,9 +10,19 @@ import "tippy.js/dist/tippy.css"; // For styling
 import "tippy.js/themes/light-border.css";
 import "tippy.js/animations/scale.css";
 import "./index.scss";
+import { TooltipContent } from "./tooltip";
+import { createRoot } from "react-dom/client";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
+
+const createContentFromComponent = (component: ReactElement) => {
+  const dummyDomEle = document.createElement("div");
+  const root = createRoot(dummyDomEle); // createRoot(container!) if you use TypeScript
+
+  root.render(component);
+  return dummyDomEle;
+};
 
 function tippyFactory(ref: { getBoundingClientRect: GetReferenceClientRect }, content: HTMLElement) {
   // Since tippy constructor requires DOM element/elements, create a placeholder
@@ -48,6 +58,7 @@ export interface TreeNode {
 
 interface GraphComponentProps {
   treeData: TreeNode;
+  onNodeSelect: (hash: string) => void;
 }
 
 const nodeWidth = 200;
@@ -94,7 +105,7 @@ const buildCytoscapeGraphData = (
   return elements;
 };
 
-const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
+const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
 
@@ -143,16 +154,22 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
 
       cyInstance.nodes().forEach((node) => {
         const tip = node.popper({
-          content: () => {
-            const content = document.createElement("div");
-            content.innerHTML = `<strong>Hash:</strong> ${node.data("label")}<br>${node.data("valueHash") ? `<strong>Value hash:</strong> ${node.data("valueHash")}` : `<strong>Value:</strong> ${node.data("value")}`}<br><strong>Key:</strong> ${node.data("key")}`;
-
-            return content;
-          },
+          content: createContentFromComponent(
+            <TooltipContent
+              label={node.data("label")}
+              valueHash={node.data("valueHash")}
+              value={node.data("value")}
+              keyHash={node.data("keyHash")}
+            />,
+          ),
         });
 
         // Store the tippy instance for cleanup later
         tippyInstances.push(tip);
+
+        node.on("tap", () => {
+          onNodeSelect(node.data("label"));
+        });
 
         // Show/hide tooltips on hover
         node.on("mouseover", () => {
@@ -182,7 +199,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
   return (
     <CytoscapeComponent
       elements={elements}
-      style={{ width: "100%", height: "100%" }}
+      className="w-full h-full"
       cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
       layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
       autoungrabify={true}
