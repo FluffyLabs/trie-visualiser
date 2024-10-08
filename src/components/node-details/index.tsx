@@ -16,7 +16,7 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
         <XIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
       </button>
       <div className="mb-2">
-        <span className="font-bold">Label:</span> {node?.name}
+        <span className="font-bold">Node Hash:</span> {node?.name}
       </div>
       {node?.attributes?.value && (
         <div className="mb-2">
