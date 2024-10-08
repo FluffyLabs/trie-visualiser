@@ -1,12 +1,13 @@
 import { Row, TrieInput } from "@/components/trie-input";
 import ExampleModal from "@/components/trie-input/example-modal";
 import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
-import Trie from "@/components/trie";
+import Trie, { TreeNode } from "@/components/trie";
 import { parseStateKey, trieToTreeUI } from "@/components/trie/utils";
 import { InMemoryTrieType } from "@/types/trie";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import NodeDetails from "@/components/node-details";
 
 const DEFAULT_ROWS_DATA: Row[] = [
   {
@@ -32,6 +33,7 @@ const DEFAULT_ROWS_DATA: Row[] = [
 
 const getTrie = (data: { key: string; value: string; action: "insert" | "remove" | "" }[]) => {
   const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher) as InMemoryTrieType;
+
   const merged = data.filter(
     ({ key }, index) => !data.slice(index, data.length).some((r) => r.key === key && r.action === "remove"),
   );
@@ -43,7 +45,23 @@ const getTrie = (data: { key: string; value: string; action: "insert" | "remove"
   return defaultTrie;
 };
 
+const findNodeByHash = (data: TreeNode[], hash: string): TreeNode | undefined => {
+  for (const item of data) {
+    if (item.name === hash) {
+      return item;
+    }
+    if (item.children) {
+      const found = findNodeByHash(item.children, hash);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return undefined;
+};
+
 export const TriePage = () => {
+  const [selectedNodeHash, setSelectedNodeHash] = useState<string | null>(null);
   const [rowsData, setRowsData] = useState<Row[]>(DEFAULT_ROWS_DATA);
   const [trie, setTrie] = useState<InMemoryTrieType>(getTrie(DEFAULT_ROWS_DATA));
   const [error, setError] = useState<string>();
@@ -66,9 +84,17 @@ export const TriePage = () => {
     }
   };
 
+  const onNodeSelect = useCallback((node: string) => {
+    setSelectedNodeHash(node);
+  }, []);
+
+  const closeNodeDetails = () => {
+    setSelectedNodeHash(null);
+  };
+
   return (
     <div className="p-3 flex flex-row h-full">
-      <div className="pr-3 border-r-2 flex-col">
+      <div className="border-r-2 flex-col">
         <div>
           <h1 className="my-2 mr-5 font-semibold inline-block">Trie Input</h1>
           <div className="inline-block">
@@ -95,7 +121,14 @@ export const TriePage = () => {
         </div>
       </div>
 
-      <div className="flex flex-row h-full w-full">{data && <Trie treeData={data} />}</div>
+      <div className="flex flex-col h-full w-full overflow-hidden">
+        <div className="grow flex flex-row w-full">{data && <Trie treeData={data} onNodeSelect={onNodeSelect} />}</div>
+        <div className="flex flex-row h-[500px] w-full">
+          {selectedNodeHash && (
+            <NodeDetails node={data && findNodeByHash([data], selectedNodeHash)} onClose={closeNodeDetails} />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

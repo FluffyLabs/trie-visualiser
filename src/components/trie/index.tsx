@@ -1,18 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape, { BaseLayoutOptions } from "cytoscape";
 import dagre from "cytoscape-dagre";
 import elk from "cytoscape-elk";
-import { truncateString } from "./utils";
+import { isEmptyNodeName, truncateString } from "./utils";
 import cytoscapePopper from "cytoscape-popper";
 import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
 import "tippy.js/themes/light-border.css";
 import "tippy.js/animations/scale.css";
 import "./index.scss";
+import { TooltipContent } from "./tooltip";
+import { createRoot } from "react-dom/client";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
+
+const createContentFromComponent = (component: ReactElement) => {
+  const dummyDomEle = document.createElement("div");
+  const root = createRoot(dummyDomEle); // createRoot(container!) if you use TypeScript
+
+  root.render(component);
+  return dummyDomEle;
+};
 
 function tippyFactory(ref: { getBoundingClientRect: GetReferenceClientRect }, content: HTMLElement) {
   // Since tippy constructor requires DOM element/elements, create a placeholder
@@ -43,30 +53,36 @@ cytoscape.use(cytoscapePopper(tippyFactory));
 export interface TreeNode {
   name: string;
   children?: TreeNode[];
-  attributes?: { [key: string]: string };
+  attributes?: {
+    nodeKey?: string;
+    value?: string;
+    valueLength?: number;
+    valueHash?: string;
+  };
 }
 
 interface GraphComponentProps {
   treeData: TreeNode;
+  onNodeSelect: (hash: string) => void;
 }
 
 const nodeWidth = 200;
 const nodeHeight = 50;
 
 // Generate a unique ID based on the node's name and some identifier
-const generateNodeId = (_node: TreeNode, parentId: string | null, index: number): string => {
+const generateNodeId = (node: TreeNode, parentId: string | null): string => {
   // You can change this logic based on your requirements
-  return parentId ? `${parentId}-${index}` : `root-${index}`;
+
+  return isEmptyNodeName(node.name) ? `${parentId}-empty` : node.name;
 };
 
 // Build Cytoscape graph data from treeData, ensuring each node is only connected to its own children
 const buildCytoscapeGraphData = (
   node: TreeNode,
   parentId: string | null = null,
-  index: number = 0,
   elements: cytoscape.ElementDefinition[] = [],
 ) => {
-  const uniqueId = generateNodeId(node, parentId, index);
+  const uniqueId = generateNodeId(node, parentId);
 
   // Insert the node to elements
   elements.push({
@@ -86,15 +102,15 @@ const buildCytoscapeGraphData = (
 
   // Ensure each node only connects to its direct children
   if (node.children && node.children.length > 0) {
-    node.children.forEach((child, childIndex) => {
-      buildCytoscapeGraphData(child, uniqueId, childIndex, elements); // Pass the current node's ID as the parentId
+    node.children.forEach((child) => {
+      buildCytoscapeGraphData(child, uniqueId, elements); // Pass the current node's ID as the parentId
     });
   }
 
   return elements;
 };
 
-const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
+const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
 
@@ -143,16 +159,22 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
 
       cyInstance.nodes().forEach((node) => {
         const tip = node.popper({
-          content: () => {
-            const content = document.createElement("div");
-            content.innerHTML = `<strong>Hash:</strong> ${node.data("label")}<br>${node.data("valueHash") ? `<strong>Value hash:</strong> ${node.data("valueHash")}` : `<strong>Value:</strong> ${node.data("value")}`}<br><strong>Key:</strong> ${node.data("key")}`;
-
-            return content;
-          },
+          content: createContentFromComponent(
+            <TooltipContent
+              label={node.data("label")}
+              valueHash={node.data("valueHash")}
+              value={node.data("value")}
+              nodeKey={node.data("nodeKey")}
+            />,
+          ),
         });
 
         // Store the tippy instance for cleanup later
         tippyInstances.push(tip);
+
+        node.on("tap", () => {
+          onNodeSelect(node.data("label"));
+        });
 
         // Show/hide tooltips on hover
         node.on("mouseover", () => {
@@ -177,12 +199,12 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData }) => {
         });
       };
     }
-  }, [elements, cyInstance]);
+  }, [elements, cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent
       elements={elements}
-      style={{ width: "100%", height: "100%" }}
+      className="w-full h-full"
       cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
       layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
       autoungrabify={true}

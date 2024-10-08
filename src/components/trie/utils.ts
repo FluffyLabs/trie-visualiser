@@ -6,11 +6,15 @@ export const truncateString = (str: string, maxLength: number = 20) =>
   str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
 
 const shouldRenderNode = (node: TrieHash, hideEmpty: boolean) => {
-  return hideEmpty ? !isEmptyNode(node) : true;
+  return hideEmpty ? !isEmptyHash(node) : true;
 };
 
-function isEmptyNode(node: TrieHash) {
-  return node.toString() === "0x0000000000000000000000000000000000000000000000000000000000000000";
+export function isEmptyHash(node: TrieHash) {
+  return isEmptyNodeName(node.toString());
+}
+
+export function isEmptyNodeName(name: string) {
+  return name === "0x0000000000000000000000000000000000000000000000000000000000000000";
 }
 export function trieToTreeUI(
   root: TrieNodeType | null,
@@ -18,7 +22,7 @@ export function trieToTreeUI(
   nodes: WriteableNodesDbType,
   hideEmpty: boolean,
 ): TreeNode | undefined {
-  if (isEmptyNode(hash)) {
+  if (isEmptyHash(hash)) {
     return {
       name: "0x0000000000000000000000000000000000000000000000000000000000000000",
     };
@@ -52,10 +56,8 @@ export function trieToTreeUI(
   return {
     name: hash.toString(),
     attributes: {
-      key: leaf.getKey().toString(),
-      ...(valueLength > 0
-        ? { value: `${leaf.getValue()}; length: ${valueLength}` }
-        : { valueHash: `${leaf.getValueHash()}` }),
+      nodeKey: leaf.getKey().toString(),
+      ...(valueLength > 0 ? { value: `${leaf.getValue()}`, valueLength } : { valueHash: `${leaf.getValueHash()}` }),
     },
   };
 }
@@ -65,3 +67,17 @@ export const HASH_BYTES = 32;
 export function parseStateKey(v: string): StateKey {
   return Bytes.parseBytesNoPrefix(v, HASH_BYTES) as StateKey;
 }
+
+export const getNodeTypeColor = (node: TreeNode) => {
+  if (getNodeType(node) === "Leaf") {
+    return "#00bcd4";
+  }
+  if (node?.name === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+    return "#c9c9c9";
+  }
+  return "#55b3f3";
+};
+
+export const getNodeType = (node: TreeNode) => {
+  return node?.attributes?.value || node?.attributes?.valueHash ? "Leaf" : "Branch";
+};
