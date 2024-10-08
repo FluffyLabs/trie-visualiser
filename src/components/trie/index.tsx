@@ -159,7 +159,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
               label={node.data("label")}
               valueHash={node.data("valueHash")}
               value={node.data("value")}
-              keyHash={node.data("keyHash")}
+              nodeKey={node.data("nodeKey")}
             />,
           ),
         });
@@ -194,7 +194,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       };
     }
-  }, [elements, cyInstance]);
+  }, [elements, cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent

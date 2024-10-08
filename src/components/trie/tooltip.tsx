@@ -1,14 +1,14 @@
 import { Node } from "@/types/tree";
 
-export const TooltipContent = ({ label, value, valueHash, keyHash }: Node) => {
+export const TooltipContent = ({ label, value, valueHash, nodeKey }: Node) => {
   return (
     <div>
       <div>
         <strong>Hash:</strong> {label}
       </div>
-      {keyHash && (
+      {nodeKey && (
         <div>
-          <strong>Key:</strong> {keyHash}
+          <strong>Key:</strong> {nodeKey}
         </div>
       )}
       {value && (

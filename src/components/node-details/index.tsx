@@ -28,9 +28,9 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
           <span className="font-bold">Value Hash:</span> {node?.attributes?.valueHash}
         </div>
       )}
-      {node?.attributes?.keyHash && (
+      {node?.attributes?.nodeKey && (
         <div className="mb-2">
-          <span className="font-bold">Key:</span> {node?.attributes?.keyHash}
+          <span className="font-bold">Key Hash:</span> {node?.attributes?.nodeKey}
         </div>
       )}
     </div>

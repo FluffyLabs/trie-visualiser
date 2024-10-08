@@ -5,7 +5,7 @@ import Trie, { TreeNode } from "@/components/trie";
 import { parseStateKey, trieToTreeUI } from "@/components/trie/utils";
 import { InMemoryTrieType } from "@/types/trie";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import NodeDetails from "@/components/node-details";
 
@@ -84,9 +84,9 @@ export const TriePage = () => {
     }
   };
 
-  const onNodeSelect = (node: string) => {
+  const onNodeSelect = useCallback((node: string) => {
     setSelectedNodeHash(node);
-  };
+  }, []);
 
   const closeNodeDetails = () => {
     setSelectedNodeHash(null);
