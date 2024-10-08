@@ -3,7 +3,7 @@ import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape, { BaseLayoutOptions } from "cytoscape";
 import dagre from "cytoscape-dagre";
 import elk from "cytoscape-elk";
-import { truncateString } from "./utils";
+import { isEmptyNodeName, truncateString } from "./utils";
 import cytoscapePopper from "cytoscape-popper";
 import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
@@ -53,7 +53,12 @@ cytoscape.use(cytoscapePopper(tippyFactory));
 export interface TreeNode {
   name: string;
   children?: TreeNode[];
-  attributes?: { [key: string]: string };
+  attributes?: {
+    nodeKey?: string;
+    value?: string;
+    valueLength?: number;
+    valueHash?: string;
+  };
 }
 
 interface GraphComponentProps {
@@ -65,19 +70,19 @@ const nodeWidth = 200;
 const nodeHeight = 50;
 
 // Generate a unique ID based on the node's name and some identifier
-const generateNodeId = (_node: TreeNode, parentId: string | null, index: number): string => {
+const generateNodeId = (node: TreeNode, parentId: string | null): string => {
   // You can change this logic based on your requirements
-  return parentId ? `${parentId}-${index}` : `root-${index}`;
+
+  return isEmptyNodeName(node.name) ? `${parentId}-empty` : node.name;
 };
 
 // Build Cytoscape graph data from treeData, ensuring each node is only connected to its own children
 const buildCytoscapeGraphData = (
   node: TreeNode,
   parentId: string | null = null,
-  index: number = 0,
   elements: cytoscape.ElementDefinition[] = [],
 ) => {
-  const uniqueId = generateNodeId(node, parentId, index);
+  const uniqueId = generateNodeId(node, parentId);
 
   // Insert the node to elements
   elements.push({
@@ -97,8 +102,8 @@ const buildCytoscapeGraphData = (
 
   // Ensure each node only connects to its direct children
   if (node.children && node.children.length > 0) {
-    node.children.forEach((child, childIndex) => {
-      buildCytoscapeGraphData(child, uniqueId, childIndex, elements); // Pass the current node's ID as the parentId
+    node.children.forEach((child) => {
+      buildCytoscapeGraphData(child, uniqueId, elements); // Pass the current node's ID as the parentId
     });
   }
 
