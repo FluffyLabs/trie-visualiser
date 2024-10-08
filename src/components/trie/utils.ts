@@ -67,3 +67,17 @@ export const HASH_BYTES = 32;
 export function parseStateKey(v: string): StateKey {
   return Bytes.parseBytesNoPrefix(v, HASH_BYTES) as StateKey;
 }
+
+export const getNodeTypeColor = (node: TreeNode) => {
+  if (getNodeType(node) === "Leaf") {
+    return "#00bcd4";
+  }
+  if (node?.name === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+    return "#c9c9c9";
+  }
+  return "#55b3f3";
+};
+
+export const getNodeType = (node: TreeNode) => {
+  return node?.attributes?.value || node?.attributes?.valueHash ? "Leaf" : "Branch";
+};

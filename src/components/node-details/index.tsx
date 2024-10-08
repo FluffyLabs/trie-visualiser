@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TreeNode } from "../trie";
 import { XIcon } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+import { getNodeType, getNodeTypeColor } from "../trie/utils";
 
 // Define the component props
 interface NodeDetailsProps {
@@ -12,10 +13,6 @@ interface NodeDetailsProps {
 const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
   const [isBinary, setIsBinary] = useState(false);
 
-  const getNodeType = () => {
-    return node?.attributes?.value || node?.attributes?.valueHash ? "Leaf" : "Branch";
-  };
-
   const convertToBinary = (hexString: string) => {
     return parseInt(hexString, 16).toString(2).padStart(8, "0");
   };
@@ -25,21 +22,8 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
     return isBinary ? convertToBinary(value) : value;
   };
 
-  const getNodeTypeColor = () => {
-    if (getNodeType() === "Leaf") {
-      return "#00bcd4";
-    }
-    if (node?.name === "0x0000000000000000000000000000000000000000000000000000000000000000") {
-      return "#c9c9c9";
-    }
-    return "#55b3f3";
-  };
-
   return (
-    <div
-      className="p-4 border border-gray-300 rounded-md shadow-md w-full relative overflow-y-auto"
-      style={{ maxHeight: "400px" }}
-    >
+    <div className="p-4 border border-gray-300 rounded-md shadow-md w-full relative overflow-y-auto">
       <button className="absolute top-2 right-2" onClick={onClose}>
         <XIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
       </button>
@@ -51,8 +35,11 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
       </div>
       <div className="mb-2">
         <span className="font-bold">Node Type:</span>
-        <span className="ml-2 px-2 py-1 rounded-full text-white" style={{ backgroundColor: getNodeTypeColor() }}>
-          {getNodeType()}
+        <span
+          className="ml-2 px-2 py-1 rounded-full text-white capitalize"
+          style={{ backgroundColor: node && getNodeTypeColor(node) }}
+        >
+          {node && getNodeType(node)}
         </span>
       </div>
       <div className="mb-2 break-words">
