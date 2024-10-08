@@ -4,7 +4,7 @@ export const TooltipContent = ({ label, value, valueHash, keyHash }: Node) => {
   return (
     <div>
       <div>
-        <strong>Label:</strong> {label}
+        <strong>Hash:</strong> {label}
       </div>
       {keyHash && (
         <div>
