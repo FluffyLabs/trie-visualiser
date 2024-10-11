@@ -12,6 +12,7 @@ import "tippy.js/animations/scale.css";
 import "./index.scss";
 import { TooltipContent } from "./tooltip";
 import { createRoot } from "react-dom/client";
+import { convertHexToBinary, getPrefixWithFirstDifference } from "@/lib/binary";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
@@ -242,6 +243,13 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
           selector: "edge",
           style: {
             width: 2,
+            label: (element: cytoscape.Singular) => {
+              const parentBinaryHash = convertHexToBinary(element.source().data("label"));
+              const childBinaryHash = convertHexToBinary(element.target().data("label"));
+
+              console.log(parentBinaryHash, childBinaryHash);
+              return getPrefixWithFirstDifference(childBinaryHash, parentBinaryHash);
+            },
             "line-color": "#ccc",
             "target-arrow-color": "#ccc",
             "target-arrow-shape": "triangle",
