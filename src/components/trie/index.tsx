@@ -80,6 +80,8 @@ const generateNodeId = (node: TreeNode, parentId: string | null): string => {
 // Build Cytoscape graph data from treeData, ensuring each node is only connected to its own children
 const buildCytoscapeGraphData = (
   node: TreeNode,
+  prefix: string,
+  position: {x: number, y: number},
   parentId: string | null = null,
   elements: cytoscape.ElementDefinition[] = [],
 ) => {
@@ -87,12 +89,15 @@ const buildCytoscapeGraphData = (
 
   // Insert the node to elements
   elements.push({
+    position,
     data: {
       id: uniqueId, // Unique ID for Cytoscape
       label: node.name,
+      prefix,
       ...node.attributes,
     },
   });
+  console.log(elements);
 
   // Connect the node to its parent if applicable
   if (parentId) {
@@ -101,10 +106,14 @@ const buildCytoscapeGraphData = (
     });
   }
 
+  console.log(node.children);
   // Ensure each node only connects to its direct children
   if (node.children && node.children.length > 0) {
-    node.children.forEach((child) => {
-      buildCytoscapeGraphData(child, uniqueId, elements); // Pass the current node's ID as the parentId
+    node.children.forEach((child, index) => {
+      const changeX = 100;
+      const changeY = 100;
+      const pos = index === 0 ? { x: position.x - changeX, y: position.y + changeY } : { x: position.x + changeX, y: position.y + changeY };
+      buildCytoscapeGraphData(child, `${prefix}${index}`, pos, uniqueId, elements); // Pass the current node's ID as the parentId
     });
   }
 
@@ -116,7 +125,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
 
   useEffect(() => {
-    const graphElements = buildCytoscapeGraphData(treeData);
+    const graphElements = buildCytoscapeGraphData(treeData, "", { x: 0, y: 0 });
     setElements(graphElements);
   }, [treeData]);
 
@@ -146,9 +155,10 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         disableOptimalOrderHeuristic: true,
         sort: () => 1,
         elk: {
-          algorithm: "mrtree",
-          "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+          algorithm: "fixed",
+          // "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
           // "org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment": "LEFT", // Align first child to the left, second to the right
+          // "org.eclipse.elk.alg.mrtree.options.OrderWeighting": "CONSTRAINT"
 
           //   "elk.spacing.nodeNode": 10,
           //   "elk.padding": new ElkPadding(),
@@ -244,11 +254,12 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
           style: {
             width: 2,
             label: (element: cytoscape.Singular) => {
-              const parentBinaryHash = convertHexToBinary(element.source().data("label"));
-              const childBinaryHash = convertHexToBinary(element.target().data("label"));
-
-              console.log(parentBinaryHash, childBinaryHash);
-              return getPrefixWithFirstDifference(childBinaryHash, parentBinaryHash);
+              return element.target().data("prefix");
+              // const parentBinaryHash = convertHexToBinary(element.source().data("label"));
+              // const childBinaryHash = convertHexToBinary(element.target().data("label"));
+              //
+              // console.log(parentBinaryHash, childBinaryHash);
+              // return getPrefixWithFirstDifference(childBinaryHash, parentBinaryHash);
             },
             "line-color": "#ccc",
             "target-arrow-color": "#ccc",
