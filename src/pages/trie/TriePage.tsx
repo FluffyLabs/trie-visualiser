@@ -1,5 +1,5 @@
 import { Row, TrieInput } from "@/components/trie-input";
-import ExampleModal from "@/components/trie-input/example-modal";
+import ExampleModal, { examples } from "@/components/trie-input/example-modal";
 import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
 import Trie, { TreeNode } from "@/components/trie";
 import { parseStateKey, trieToTreeUI } from "@/components/trie/utils";
@@ -9,27 +9,7 @@ import { useCallback, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import NodeDetails from "@/components/node-details";
 
-const DEFAULT_ROWS_DATA: Row[] = [
-  {
-    id: "1",
-    action: "insert",
-    key: "5dffe0e2c9f089d30e50b04ee562445cf2c0e7e7d677580ef0ccf2c6fa3522dd",
-    value:
-      "bb11c256876fe10442213dd78714793394d2016134c28a64eb27376ddc147fc6044df72bdea44d9ec66a3ea1e6d523f7de71db1d05a980e001e9fa",
-    isSubmitted: true,
-    isHidden: false,
-    isEditing: false,
-  },
-  {
-    id: "2",
-    action: "insert",
-    key: "df08871e8a54fde4834d83851469e635713615ab1037128df138a6cd223f1242",
-    value: "b8bded4e1c",
-    isSubmitted: true,
-    isHidden: false,
-    isEditing: false,
-  },
-];
+const DEFAULT_ROWS_DATA: Row[] = examples[0].rows;
 
 const getTrie = (data: { key: string; value: string; action: "insert" | "remove" | "" }[]) => {
   const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher) as InMemoryTrieType;
@@ -123,11 +103,11 @@ export const TriePage = () => {
 
       <div className="flex flex-col h-full w-full overflow-hidden">
         <div className="grow flex flex-row w-full">{data && <Trie treeData={data} onNodeSelect={onNodeSelect} />}</div>
-        <div className="flex flex-row h-[500px] w-full">
+        {/* <div className="flex flex-row h-[500px] w-full">
           {selectedNodeHash && (
             <NodeDetails node={data && findNodeByHash([data], selectedNodeHash)} onClose={closeNodeDetails} />
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

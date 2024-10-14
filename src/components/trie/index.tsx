@@ -81,7 +81,7 @@ const generateNodeId = (node: TreeNode, parentId: string | null): string => {
 const buildCytoscapeGraphData = (
   node: TreeNode,
   prefix: string,
-  position: {x: number, y: number},
+  position: { x: number; y: number },
   parentId: string | null = null,
   elements: cytoscape.ElementDefinition[] = [],
 ) => {
@@ -106,13 +106,25 @@ const buildCytoscapeGraphData = (
     });
   }
 
-  console.log(node.children);
   // Ensure each node only connects to its direct children
   if (node.children && node.children.length > 0) {
     node.children.forEach((child, index) => {
-      const changeX = 100;
+      const hasChildNodes = child.children && child.children.length > 0;
+      const changeX = 100 * (hasChildNodes ? 1.5 : 1);
       const changeY = 100;
-      const pos = index === 0 ? { x: position.x - changeX, y: position.y + changeY } : { x: position.x + changeX, y: position.y + changeY };
+      const pos =
+        index === 0
+          ? { x: position.x - changeX, y: position.y + changeY }
+          : { x: position.x + changeX, y: position.y + changeY };
+
+      // let newHasSiblingNode = false;
+      // if (child.children && child.children.length > 1) {
+      //   const siblingIndex = index === 0 ? 1 : 0;
+
+      //   newHasSiblingNode = child.children[siblingIndex].children
+      //     ? child.children[siblingIndex].children.length > 0
+      //     : false;
+      // }
       buildCytoscapeGraphData(child, `${prefix}${index}`, pos, uniqueId, elements); // Pass the current node's ID as the parentId
     });
   }
@@ -218,7 +230,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
       className="w-full h-full"
       cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
       layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
-      autoungrabify={true}
+      // autoungrabify={true}
       stylesheet={[
         {
           selector: "node",
