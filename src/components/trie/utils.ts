@@ -21,10 +21,14 @@ export function trieToTreeUI(
   hash: TrieHash,
   nodes: WriteableNodesDbType,
   hideEmpty: boolean,
+  prefix: string = "",
 ): TreeNode | undefined {
   if (isEmptyHash(hash)) {
     return {
       name: "0x0000000000000000000000000000000000000000000000000000000000000000",
+      attributes: {
+        prefix,
+      },
     };
   }
 
@@ -38,11 +42,14 @@ export function trieToTreeUI(
     const leftHash = branch.getLeft();
     const rightHash = branch.getRight();
 
-    const left = trieToTreeUI(nodes.get(leftHash), leftHash, nodes, hideEmpty);
-    const right = trieToTreeUI(nodes.get(rightHash), rightHash, nodes, hideEmpty);
+    const left = trieToTreeUI(nodes.get(leftHash), leftHash, nodes, hideEmpty, prefix + "0");
+    const right = trieToTreeUI(nodes.get(rightHash), rightHash, nodes, hideEmpty, prefix + "1");
 
     return {
       name: hash.toString(),
+      attributes: {
+        prefix,
+      },
       children: [
         shouldRenderNode(leftHash, hideEmpty) ? left : null,
         shouldRenderNode(rightHash, hideEmpty) ? right : null,
@@ -57,6 +64,7 @@ export function trieToTreeUI(
     name: hash.toString(),
     attributes: {
       nodeKey: leaf.getKey().toString(),
+      prefix,
       ...(valueLength > 0 ? { value: `${leaf.getValue()}`, valueLength } : { valueHash: `${leaf.getValueHash()}` }),
     },
   };

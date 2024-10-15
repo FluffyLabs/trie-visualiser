@@ -102,12 +102,14 @@ export const TriePage = () => {
       </div>
 
       <div className="flex flex-col h-full w-full overflow-hidden">
-        <div className="grow flex flex-row w-full">{data && <Trie treeData={data} onNodeSelect={onNodeSelect} />}</div>
-        {/* <div className="flex flex-row h-[500px] w-full">
-          {selectedNodeHash && (
+        <div className="grow flex flex-row w-full  overflow-hidden">
+          {data && <Trie treeData={data} onNodeSelect={onNodeSelect} />}
+        </div>
+        {selectedNodeHash && (
+          <div className="flex flex-row h-[500px] w-full">
             <NodeDetails node={data && findNodeByHash([data], selectedNodeHash)} onClose={closeNodeDetails} />
-          )}
-        </div> */}
+          </div>
+        )}
       </div>
     </div>
   );
