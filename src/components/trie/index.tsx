@@ -214,7 +214,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       };
     }
-  }, [elements, cyInstance, onNodeSelect, containerSize]);
+  }, [elements, cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent
