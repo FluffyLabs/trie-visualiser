@@ -134,6 +134,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
 
   // Update the layout when elements change
   useEffect(() => {
+    console.log("cyInstance", cyInstance);
     if (cyInstance) {
       const layout = cyInstance.layout({
         name: "elk", // Hierarchical layout
@@ -156,7 +157,6 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         edgeSep: 50, // Space between edges
         rankSep: 100, // Space between ranks (levels of hierarchy),
         disableOptimalOrderHeuristic: true,
-        sort: () => 1,
         elk: {
           algorithm: "fixed",
           // "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
@@ -170,7 +170,6 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
 
       // Keep track of created tippy instances
       const tippyInstances: cytoscapePopper.PopperInstance[] = [];
-
       cyInstance.nodes().forEach((node) => {
         const tip = node.popper({
           content: createContentFromComponent(
@@ -214,7 +213,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       };
     }
-  }, [elements, cyInstance, onNodeSelect]);
+  }, [cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent
@@ -225,9 +224,13 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
           setContainerSize({ width: ev.target.clientWidth, height: ev.target.clientHeight });
         });
 
-        setCyInstance(cy);
+        cy.on("add", (ev) => {
+          setCyInstance(ev.cy);
+        });
+
+        // setCyInstance(cy);
       }} // Reference to the Cytoscape instance
-      layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
+      layout={{ name: "preset", zoom: 0.5, padding: 40 }} // Preset layout initially (layout controlled by effect)
       // autoungrabify={true}
       stylesheet={[
         {
