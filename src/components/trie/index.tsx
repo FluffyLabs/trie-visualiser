@@ -93,7 +93,6 @@ const buildCytoscapeGraphData = (treeData: TreeNode, width: number, height: numb
     const parentId = node.parent ? generateNodeId(node.parent.data, null) : null;
     const uniqueId = generateNodeId(node.data, parentId);
 
-    console.log(node);
     // Add the node with position
     elements.push({
       data: {
@@ -135,7 +134,6 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
 
   // Update the layout when elements change
   useEffect(() => {
-    console.log("cyInstance", cyInstance);
     if (cyInstance) {
       const layout = cyInstance.layout({
         name: "elk", // Hierarchical layout
@@ -214,7 +212,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       };
     }
-  }, [elements, cyInstance, onNodeSelect]);
+  }, [cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent
