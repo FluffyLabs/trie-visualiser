@@ -13,6 +13,7 @@ import "./index.scss";
 import { TooltipContent } from "./tooltip";
 import { createRoot } from "react-dom/client";
 import * as d3 from "d3";
+import { isEqual } from "lodash";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
@@ -129,8 +130,15 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
 
   useEffect(() => {
     const graphElements = buildCytoscapeGraphData(treeData, containerSize.width, containerSize.height);
-    setElements(graphElements);
-  }, [containerSize.height, containerSize.width, treeData]);
+    // Perform deep equal to make sure the values are different and prevent trie re-rendering. It's more expensive operation
+    if (!isEqual(graphElements, elements)) {
+      setElements(graphElements);
+    }
+  }, [containerSize.height, containerSize.width, elements, treeData]);
+
+  useEffect(() => {
+    console.log(elements);
+  }, [elements]);
 
   // Update the layout when elements change
   useEffect(() => {
@@ -212,7 +220,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       };
     }
-  }, [cyInstance, onNodeSelect]);
+  }, [elements, cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent
