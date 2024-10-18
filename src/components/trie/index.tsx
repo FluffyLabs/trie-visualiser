@@ -89,10 +89,11 @@ const buildCytoscapeGraphData = (treeData: TreeNode, width: number, height: numb
   const elements: cytoscape.ElementDefinition[] = [];
 
   // Traverse the computed positions to build Cytoscape elements
-  root.descendants().forEach((node) => {
+  (root.descendants() as unknown as (d3.HierarchyNode<TreeNode> & { x: number; y: number })[]).forEach((node) => {
     const parentId = node.parent ? generateNodeId(node.parent.data, null) : null;
     const uniqueId = generateNodeId(node.data, parentId);
 
+    console.log(node);
     // Add the node with position
     elements.push({
       data: {
@@ -213,7 +214,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       };
     }
-  }, [cyInstance, onNodeSelect]);
+  }, [elements, cyInstance, onNodeSelect]);
 
   return (
     <CytoscapeComponent
@@ -266,7 +267,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
           selector: "edge",
           style: {
             width: 2,
-            label: (element: cytoscape.Singular) => {
+            label: (element: cytoscape.EdgeSingular) => {
               return element.target().data("prefix");
             },
             "line-color": "#ccc",

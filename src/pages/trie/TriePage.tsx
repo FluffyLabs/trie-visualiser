@@ -9,7 +9,7 @@ import { useCallback, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import NodeDetails from "@/components/node-details";
 
-const DEFAULT_ROWS_DATA: Row[] = examples[1].rows;
+const DEFAULT_ROWS_DATA: Row[] = examples[0].rows;
 
 const getTrie = (data: { key: string; value: string; action: "insert" | "remove" | "" }[]) => {
   const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher) as InMemoryTrieType;

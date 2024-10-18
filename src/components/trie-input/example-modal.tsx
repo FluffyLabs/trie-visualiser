@@ -8,6 +8,30 @@ import { Row } from ".";
 // eslint-disable-next-line react-refresh/only-export-components
 export const examples: { name: string; rows: Row[] }[] = [
   {
+    name: "Simple 2 elements",
+    rows: [
+      {
+        id: "1",
+        action: "insert",
+        key: "5dffe0e2c9f089d30e50b04ee562445cf2c0e7e7d677580ef0ccf2c6fa3522dd",
+        value:
+          "bb11c256876fe10442213dd78714793394d2016134c28a64eb27376ddc147fc6044df72bdea44d9ec66a3ea1e6d523f7de71db1d05a980e001e9fa",
+        isSubmitted: true,
+        isHidden: false,
+        isEditing: false,
+      },
+      {
+        id: "2",
+        action: "insert",
+        key: "5a37871e8a54fde4834d83851469e635713615ab1037128df138a6cd223f1242",
+        value: "b8bded4e1c",
+        isSubmitted: true,
+        isHidden: false,
+        isEditing: false,
+      },
+    ],
+  },
+  {
     name: "Test vectors 10",
     rows: [
       {
