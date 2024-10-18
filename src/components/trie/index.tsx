@@ -3,7 +3,7 @@ import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape, { BaseLayoutOptions } from "cytoscape";
 import dagre from "cytoscape-dagre";
 import elk from "cytoscape-elk";
-import { isEmptyNodeName, truncateString } from "./utils";
+import { isEmptyNodeName, trimEdgePrefix, truncateString } from "./utils";
 import cytoscapePopper from "cytoscape-popper";
 import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
@@ -274,7 +274,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
           style: {
             width: 2,
             label: (element: cytoscape.EdgeSingular) => {
-              return element.target().data("prefix");
+              return trimEdgePrefix(element.target().data("prefix"));
             },
             "line-color": "#ccc",
             "target-arrow-color": "#ccc",

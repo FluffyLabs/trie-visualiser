@@ -89,3 +89,17 @@ export const getNodeTypeColor = (node: TreeNode) => {
 export const getNodeType = (node: TreeNode) => {
   return node?.attributes?.value || node?.attributes?.valueHash ? "Leaf" : "Branch";
 };
+
+export const trimEdgePrefix = (prefix: string) => {
+  if (prefix.length <= 4) {
+    return `0x${prefix}`;
+  }
+
+  const binaryLimit = 3;
+  const hexPart = parseInt(prefix.slice(0, prefix.length - binaryLimit), 2)
+    .toString(16)
+    .padStart(2, "0");
+  const decimalPart = prefix.slice(prefix.length - binaryLimit, prefix.length);
+
+  return `0x${hexPart}++b${decimalPart}`;
+};
