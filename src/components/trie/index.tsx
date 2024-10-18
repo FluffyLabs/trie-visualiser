@@ -3,7 +3,7 @@ import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape, { BaseLayoutOptions } from "cytoscape";
 import dagre from "cytoscape-dagre";
 import elk from "cytoscape-elk";
-import { isEmptyNodeName, truncateString } from "./utils";
+import { isEmptyNodeName, trimEdgePrefix, truncateString } from "./utils";
 import cytoscapePopper from "cytoscape-popper";
 import tippy, { GetReferenceClientRect } from "tippy.js";
 import "tippy.js/dist/tippy.css"; // For styling
@@ -12,6 +12,8 @@ import "tippy.js/animations/scale.css";
 import "./index.scss";
 import { TooltipContent } from "./tooltip";
 import { createRoot } from "react-dom/client";
+import * as d3 from "d3";
+import { isEqual } from "lodash";
 
 cytoscape.use(dagre);
 cytoscape.use(elk);
@@ -53,7 +55,8 @@ cytoscape.use(cytoscapePopper(tippyFactory));
 export interface TreeNode {
   name: string;
   children?: TreeNode[];
-  attributes?: {
+  attributes: {
+    prefix?: string;
     nodeKey?: string;
     value?: string;
     valueLength?: number;
@@ -76,36 +79,46 @@ const generateNodeId = (node: TreeNode, parentId: string | null): string => {
   return isEmptyNodeName(node.name) ? `${parentId}-empty` : node.name;
 };
 
-// Build Cytoscape graph data from treeData, ensuring each node is only connected to its own children
-const buildCytoscapeGraphData = (
-  node: TreeNode,
-  parentId: string | null = null,
-  elements: cytoscape.ElementDefinition[] = [],
-) => {
-  const uniqueId = generateNodeId(node, parentId);
+const buildCytoscapeGraphData = (treeData: TreeNode, width: number, height: number): cytoscape.ElementDefinition[] => {
+  // Create a D3 hierarchy from the tree data
+  const root = d3.hierarchy<TreeNode>(treeData);
 
-  // Insert the node to elements
-  elements.push({
-    data: {
-      id: uniqueId, // Unique ID for Cytoscape
-      label: node.name,
-      ...node.attributes,
-    },
-  });
+  // Compute the tree layout
+  const treeLayout = d3.tree<TreeNode>().size([width, height]).nodeSize([220, 100]);
+  treeLayout(root);
 
-  // Connect the node to its parent if applicable
-  if (parentId) {
+  const elements: cytoscape.ElementDefinition[] = [];
+
+  // Traverse the computed positions to build Cytoscape elements
+  (root.descendants() as unknown as (d3.HierarchyNode<TreeNode> & { x: number; y: number })[]).forEach((node) => {
+    const parentId = node.parent ? generateNodeId(node.parent.data, null) : null;
+    const uniqueId = generateNodeId(node.data, parentId);
+
+    // Add the node with position
     elements.push({
-      data: { id: `${parentId}-${uniqueId}`, source: parentId, target: uniqueId },
+      data: {
+        id: uniqueId,
+        label: node.data.name,
+        // prefix: node.depth.toString(), // You can adjust this as needed
+        ...node.data.attributes,
+      },
+      position: {
+        x: node.x,
+        y: node.y,
+      },
     });
-  }
 
-  // Ensure each node only connects to its direct children
-  if (node.children && node.children.length > 0) {
-    node.children.forEach((child) => {
-      buildCytoscapeGraphData(child, uniqueId, elements); // Pass the current node's ID as the parentId
-    });
-  }
+    // Add an edge from parent to child
+    if (parentId) {
+      elements.push({
+        data: {
+          id: `${parentId}-${uniqueId}`,
+          source: parentId,
+          target: uniqueId,
+        },
+      });
+    }
+  });
 
   return elements;
 };
@@ -113,11 +126,19 @@ const buildCytoscapeGraphData = (
 const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
 
   useEffect(() => {
-    const graphElements = buildCytoscapeGraphData(treeData);
-    setElements(graphElements);
-  }, [treeData]);
+    const graphElements = buildCytoscapeGraphData(treeData, containerSize.width, containerSize.height);
+    // Perform deep equal to make sure the values are different and prevent trie re-rendering. It's more expensive operation
+    if (!isEqual(graphElements, elements)) {
+      setElements(graphElements);
+    }
+  }, [containerSize.height, containerSize.width, elements, treeData]);
+
+  useEffect(() => {
+    console.log(elements);
+  }, [elements]);
 
   // Update the layout when elements change
   useEffect(() => {
@@ -125,8 +146,8 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
       const layout = cyInstance.layout({
         name: "elk", // Hierarchical layout
         directed: true, // Ensures child nodes are below parent nodes
-        padding: 1, // Padding around the layout
-        spacingFactor: 1.2, // Increase spacing between nodes
+        padding: 10, // Padding around the layout
+        // spacingFactor: 1, // Increase spacing between nodes
         avoidOverlap: true, // Prevent nodes from overlapping
         animate: true, // Animate the layout changes
         circle: false, // Disable circle layout
@@ -143,11 +164,11 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         edgeSep: 50, // Space between edges
         rankSep: 100, // Space between ranks (levels of hierarchy),
         disableOptimalOrderHeuristic: true,
-        sort: () => 1,
         elk: {
-          algorithm: "mrtree",
-          "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+          algorithm: "fixed",
+          // "org.eclipse.elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
           // "org.eclipse.elk.layered.nodePlacement.bk.fixedAlignment": "LEFT", // Align first child to the left, second to the right
+          // "org.eclipse.elk.alg.mrtree.options.OrderWeighting": "CONSTRAINT"
 
           //   "elk.spacing.nodeNode": 10,
           //   "elk.padding": new ElkPadding(),
@@ -156,7 +177,6 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
 
       // Keep track of created tippy instances
       const tippyInstances: cytoscapePopper.PopperInstance[] = [];
-
       cyInstance.nodes().forEach((node) => {
         const tip = node.popper({
           content: createContentFromComponent(
@@ -190,6 +210,7 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
         });
       });
       layout.run();
+
       // Cleanup tooltips and listeners on component unmount or element change
       return () => {
         tippyInstances.forEach((tip) => {
@@ -205,9 +226,19 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
     <CytoscapeComponent
       elements={elements}
       className="w-full h-full"
-      cy={(cy) => setCyInstance(cy)} // Reference to the Cytoscape instance
-      layout={{ name: "preset" }} // Preset layout initially (layout controlled by effect)
-      autoungrabify={true}
+      cy={(cy) => {
+        cy.on("resize", (ev) => {
+          setContainerSize({ width: ev.target.clientWidth, height: ev.target.clientHeight });
+        });
+
+        cy.on("add", (ev) => {
+          setCyInstance(ev.cy);
+        });
+
+        // setCyInstance(cy);
+      }} // Reference to the Cytoscape instance
+      layout={{ name: "preset", zoom: 0.5, padding: 40 }} // Preset layout initially (layout controlled by effect)
+      // autoungrabify={true}
       stylesheet={[
         {
           selector: "node",
@@ -242,6 +273,9 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
           selector: "edge",
           style: {
             width: 2,
+            label: (element: cytoscape.EdgeSingular) => {
+              return trimEdgePrefix(element.target().data("prefix"));
+            },
             "line-color": "#ccc",
             "target-arrow-color": "#ccc",
             "target-arrow-shape": "triangle",
