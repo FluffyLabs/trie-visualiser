@@ -92,14 +92,13 @@ export const getNodeType = (node: TreeNode) => {
 
 export const trimEdgePrefix = (prefix: string) => {
   if (prefix.length <= 4) {
-    return `0x${prefix}`;
+    return `0b${prefix}`;
   }
 
-  const binaryLimit = 3;
-  const hexPart = parseInt(prefix.slice(0, prefix.length - binaryLimit), 2)
-    .toString(16)
-    .padStart(2, "0");
-  const decimalPart = prefix.slice(prefix.length - binaryLimit, prefix.length);
+  const prefixLength = Math.floor((prefix.length - 1) / 4) * 4;
 
-  return `0x${hexPart}++b${decimalPart}`;
+  const hexPart = parseInt(prefix.slice(0, prefixLength), 2).toString(16);
+  const binaryPart = prefix.slice(prefixLength);
+
+  return `0x${hexPart} ++ b${binaryPart}`;
 };

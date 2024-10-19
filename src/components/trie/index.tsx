@@ -136,10 +136,6 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
     }
   }, [containerSize.height, containerSize.width, elements, treeData]);
 
-  useEffect(() => {
-    console.log(elements);
-  }, [elements]);
-
   // Update the layout when elements change
   useEffect(() => {
     if (cyInstance) {
@@ -275,6 +271,9 @@ const Trie: React.FC<GraphComponentProps> = ({ treeData, onNodeSelect }) => {
             width: 2,
             label: (element: cytoscape.EdgeSingular) => {
               return trimEdgePrefix(element.target().data("prefix"));
+            },
+            "text-margin-x": (element: cytoscape.EdgeSingular) => {
+              return element.target().data("prefix").slice(-1) === "0" ? -50 : 50;
             },
             "line-color": "#ccc",
             "target-arrow-color": "#ccc",
