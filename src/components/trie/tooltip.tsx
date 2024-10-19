@@ -8,7 +8,7 @@ export const TooltipContent = ({ label, value, valueHash, nodeKey }: Node) => {
       </div>
       {nodeKey && (
         <div>
-          <strong>Key:</strong> {nodeKey}
+          <strong>Truncated key:</strong> {nodeKey}
         </div>
       )}
       {value && (
