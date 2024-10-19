@@ -3,6 +3,7 @@ import { TreeNode } from "../trie";
 import { XIcon } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { getNodeType, getNodeTypeColor } from "../trie/utils";
+import { convertHexToBinary } from "@/lib/binary";
 
 // Define the component props
 interface NodeDetailsProps {
@@ -13,13 +14,9 @@ interface NodeDetailsProps {
 const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
   const [isBinary, setIsBinary] = useState(false);
 
-  const convertToBinary = (hexString: string) => {
-    return parseInt(hexString, 16).toString(2).padStart(8, "0");
-  };
-
   const displayValue = (value: string | undefined) => {
     if (!value) return "";
-    return isBinary ? convertToBinary(value) : value;
+    return isBinary ? convertHexToBinary(value) : value;
   };
 
   return (
@@ -45,6 +42,12 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
       <div className="mb-2 break-words">
         <span className="font-bold">Node Hash:</span> {displayValue(node?.name)}
       </div>
+
+      {node?.attributes?.nodeKey && (
+        <div className="mb-2 break-words">
+          <span className="font-bold">Key:</span> {displayValue(node?.attributes?.nodeKey)}
+        </div>
+      )}
       {node?.attributes?.value && (
         <div className="mb-2 break-words">
           <span className="font-bold">Value:</span> {displayValue(node?.attributes?.value)}
@@ -53,11 +56,6 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({ node, onClose }) => {
       {node?.attributes?.valueHash && (
         <div className="mb-2 break-words">
           <span className="font-bold">Value Hash:</span> {displayValue(node?.attributes?.valueHash)}
-        </div>
-      )}
-      {node?.attributes?.nodeKey && (
-        <div className="mb-2 break-words">
-          <span className="font-bold">Key Hash:</span> {displayValue(node?.attributes?.nodeKey)}
         </div>
       )}
     </div>
