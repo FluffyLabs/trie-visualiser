@@ -1,6 +1,5 @@
 import blake2b from "blake2b";
-import { Bytes, TrieHash } from "@typeberry/trie";
-import { TrieHasher } from "@/types/trie";
+import { Bytes, TrieHash, TrieHasher } from "@typeberry/trie";
 import { HASH_BYTES } from "./utils";
 
 export const blake2bTrieHasher: TrieHasher = {

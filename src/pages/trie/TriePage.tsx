@@ -2,8 +2,8 @@ import { Row, TrieInput } from "@/components/trie-input";
 import ExampleModal, { examples } from "@/components/trie-input/example-modal";
 import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
 import Trie, { TreeNode } from "@/components/trie";
-import { parseInputKey, trieToTreeUI } from "@/components/trie/utils";
-import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
+import { trieToTreeUI } from "@/components/trie/utils";
+import { InMemoryTrie, BytesBlob, parseInputKey } from "@typeberry/trie";
 import { useCallback, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import NodeDetails from "@/components/node-details";
@@ -45,12 +45,7 @@ export const TriePage = () => {
   const [trie, setTrie] = useState<InMemoryTrie>(getTrie(DEFAULT_ROWS_DATA));
   const [error, setError] = useState<string>();
   const [hideEmpty, setHideEmpty] = useState<boolean>(false);
-  // TODO [ToDr] remove when properly typed.
-  // eslint-disable-next-line
-  const nodes = (trie as any).nodes;
-  // eslint-disable-next-line
-  const root = (trie as any).root;
-  const data = trie && trieToTreeUI(root, trie.getRoot(), nodes, hideEmpty);
+  const data = trie && trieToTreeUI(trie.getRootNode(), trie.getRootHash(), trie.nodes, hideEmpty);
 
   const onChange = (rows: Row[]) => {
     const input = rows.map(({ key, value, action }) => ({ key, value, action }));
