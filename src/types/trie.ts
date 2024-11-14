@@ -1,4 +1,4 @@
-import { BytesBlob, TrieHash, type Bytes } from '@typeberry/trie';
+import { BytesBlob, TrieHash, type Bytes } from "@typeberry/trie";
 
 export type TrieHasher = {
   hashConcat(n: Uint8Array, r?: Uint8Array[]): TrieHash;
