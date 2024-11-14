@@ -46,7 +46,9 @@ export const TriePage = () => {
   const [error, setError] = useState<string>();
   const [hideEmpty, setHideEmpty] = useState<boolean>(false);
   // TODO [ToDr] remove when properly typed.
+  // eslint-disable-next-line
   const nodes = (trie as any).nodes;
+  // eslint-disable-next-line
   const root = (trie as any).root;
   const data = trie && trieToTreeUI(root, trie.getRoot(), nodes, hideEmpty);
 
