@@ -1,6 +1,6 @@
 import { TreeNode } from ".";
-import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType, TrieHash } from "../../types/trie";
-import { Bytes } from "@typeberry/trie";
+import { TrieNodeType, NodeType, WriteableNodesDbType } from "../../types/trie";
+import { Bytes, TrieHash } from "@typeberry/trie";
 
 export const truncateString = (str: string, maxLength: number = 20) =>
   str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
@@ -71,9 +71,14 @@ export function trieToTreeUI(
 }
 
 export const HASH_BYTES = 32;
+export const TRUNCATED_KEY_BYTES = 31;
 
-export function parseStateKey(v: string): StateKey {
-  return Bytes.parseBytesNoPrefix(v, HASH_BYTES) as StateKey;
+// TODO [ToDr] Use exports from @typeberry/trie instead.
+export function parseInputKey(v: string) {
+  if (v.length === HASH_BYTES * 2) {
+    return Bytes.parseBytesNoPrefix(v, HASH_BYTES).asOpaque();
+  }
+  return Bytes.parseBytesNoPrefix(v, TRUNCATED_KEY_BYTES).asOpaque();
 }
 
 export const getNodeTypeColor = (node: TreeNode) => {

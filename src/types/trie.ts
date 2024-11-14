@@ -1,3 +1,5 @@
+import { BytesBlob, TrieHash, type Bytes } from '@typeberry/trie';
+
 export type TrieHasher = {
   hashConcat(n: Uint8Array, r?: Uint8Array[]): TrieHash;
 };
@@ -6,16 +8,6 @@ type BranchNodeType = {
   node: TrieNodeType;
   getLeft: () => TrieHash;
   getRight: () => TrieHash;
-};
-
-type Bytes<T extends number> = {
-  readonly raw: Uint8Array;
-  readonly length: T;
-  toString(): string;
-  isEqualTo(other: Bytes<T>): boolean;
-  zero<X extends number>(len: X): Bytes<X>;
-  parseBytesNoPrefix<X extends number>(v: string, len: X): Bytes<X>;
-  parseBytes<X extends number>(v: string, len: X): Bytes<X>;
 };
 
 type StringLiteral<Type> = Type extends string ? (string extends Type ? never : Type) : never;
@@ -43,26 +35,6 @@ export type TrieNodeType = {
   asLeafNode(): LeafNodeType;
 };
 
-// export type TrieNodeType = BranchNodeType | LeafNodeType;
-
-type BytesBlob = {
-  buffer: ArrayBuffer;
-  length: number;
-};
-
-export type TrieHash = {
-  raw: Uint8Array;
-};
-
-export type InMemoryTrieType = {
-  flat: Map<string, BytesBlob>;
-  nodes: WriteableNodesDbType;
-  root: TrieNodeType | null;
-  set: (key: StateKey, value: BytesBlob, maybeValueHash?: TrieHash) => void;
-  getRoot: () => TrieHash;
-  toString: () => string;
-};
-
 export enum NodeType {
   /** Branch node (left & right subtree hashes) */
   Branch = 0,
@@ -80,17 +52,6 @@ export type NodesDbType = {
   hashNode(n: TrieNodeType): TrieHash;
   hashCompatStr(hash: TrieHash): string;
 };
-
-export type BytesBlobType = {
-  readonly buffer: Uint8Array;
-  readonly length: number;
-  toString(): string;
-  fromBytes(v: number[]): BytesBlob;
-  parseBlobNoPrefix(v: string): BytesBlob;
-  parseBlob(v: string): BytesBlob;
-};
-
-export type StateKey = Opaque<Bytes<32>, "stateKey">;
 
 export type WriteableNodesDbType = NodesDbType & {
   remove(hash: TrieHash): void;

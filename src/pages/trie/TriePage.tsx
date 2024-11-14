@@ -2,8 +2,7 @@ import { Row, TrieInput } from "@/components/trie-input";
 import ExampleModal, { examples } from "@/components/trie-input/example-modal";
 import { blake2bTrieHasher } from "@/components/trie/blake2b.node";
 import Trie, { TreeNode } from "@/components/trie";
-import { parseStateKey, trieToTreeUI } from "@/components/trie/utils";
-import { InMemoryTrieType } from "@/types/trie";
+import { parseInputKey, trieToTreeUI } from "@/components/trie/utils";
 import { InMemoryTrie, BytesBlob } from "@typeberry/trie";
 import { useCallback, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,13 +11,13 @@ import NodeDetails from "@/components/node-details";
 const DEFAULT_ROWS_DATA: Row[] = examples[0].rows;
 
 const getTrie = (data: { key: string; value: string; action: "insert" | "remove" | "" }[]) => {
-  const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher) as InMemoryTrieType;
+  const defaultTrie = InMemoryTrie.empty(blake2bTrieHasher);
 
   const merged = data.filter(
     ({ key }, index) => !data.slice(index, data.length).some((r) => r.key === key && r.action === "remove"),
   );
   for (const { key, value } of merged) {
-    const stateKey = parseStateKey(key);
+    const stateKey = parseInputKey(key);
     const val = BytesBlob.parseBlobNoPrefix(value);
     defaultTrie.set(stateKey, val);
   }
@@ -43,10 +42,13 @@ const findNodeByHash = (data: TreeNode[], hash: string): TreeNode | undefined =>
 export const TriePage = () => {
   const [selectedNodeHash, setSelectedNodeHash] = useState<string | null>(null);
   const [rowsData, setRowsData] = useState<Row[]>(DEFAULT_ROWS_DATA);
-  const [trie, setTrie] = useState<InMemoryTrieType>(getTrie(DEFAULT_ROWS_DATA));
+  const [trie, setTrie] = useState<InMemoryTrie>(getTrie(DEFAULT_ROWS_DATA));
   const [error, setError] = useState<string>();
   const [hideEmpty, setHideEmpty] = useState<boolean>(false);
-  const data = trie && trieToTreeUI(trie.root, trie.getRoot(), trie.nodes, hideEmpty);
+  // TODO [ToDr] remove when properly typed.
+  const nodes = (trie as any).nodes;
+  const root = (trie as any).root;
+  const data = trie && trieToTreeUI(root, trie.getRoot(), nodes, hideEmpty);
 
   const onChange = (rows: Row[]) => {
     const input = rows.map(({ key, value, action }) => ({ key, value, action }));

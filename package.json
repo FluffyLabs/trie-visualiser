@@ -21,7 +21,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@react-spring/web": "^9.7.4",
-    "@typeberry/trie": "^0.0.1-bdc68c7",
+    "@typeberry/trie": "^0.0.1-7b39e2f",
     "@types/d3": "^7.4.3",
     "@types/dagre-layout": "^0.8.5",
     "@xyflow/react": "^12.3.0",
