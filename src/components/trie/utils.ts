@@ -1,6 +1,7 @@
 import { TreeNode } from ".";
-import { TrieNodeType, NodeType, StateKey, WriteableNodesDbType, TrieHash } from "../../types/trie";
-import { Bytes } from "@typeberry/trie";
+import { NodeType, TrieHash, TrieNode, WriteableNodesDb } from "@typeberry/trie";
+
+export const HASH_BYTES = 32;
 
 export const truncateString = (str: string, maxLength: number = 20) =>
   str.length >= maxLength ? str.substring(0, 4) + "..." + str.substring(str.length - 4) : str;
@@ -17,9 +18,9 @@ export function isEmptyNodeName(name: string) {
   return name === "0x0000000000000000000000000000000000000000000000000000000000000000";
 }
 export function trieToTreeUI(
-  root: TrieNodeType | null,
+  root: TrieNode | null,
   hash: TrieHash,
-  nodes: WriteableNodesDbType,
+  nodes: WriteableNodesDb,
   hideEmpty: boolean,
   prefix: string = "",
 ): TreeNode | undefined {
@@ -68,12 +69,6 @@ export function trieToTreeUI(
       ...(valueLength > 0 ? { value: `${leaf.getValue()}`, valueLength } : { valueHash: `${leaf.getValueHash()}` }),
     },
   };
-}
-
-export const HASH_BYTES = 32;
-
-export function parseStateKey(v: string): StateKey {
-  return Bytes.parseBytesNoPrefix(v, HASH_BYTES) as StateKey;
 }
 
 export const getNodeTypeColor = (node: TreeNode) => {
